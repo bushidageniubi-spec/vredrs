@@ -1,0 +1,232 @@
+================================================================================
+VREDRS ERROR HANDBOOK  —  Version 0.1.1
+================================================================================
+
+This handbook lists every error code, its meaning, common causes, and
+suggested fixes. Errors are grouped by phase: Lexical, Parse, Semantic,
+Codegen, Runtime.
+
+--------------------------------------------------------------------------------
+ERROR CODE FORMAT
+--------------------------------------------------------------------------------
+
+All Vredrs errors carry a code of the form C0NNN, where NN groups:
+
+    C00xx  Lexical errors
+    C01xx  Parse errors
+    C02xx  Semantic errors
+    C03xx  Codegen errors
+    C04xx  Runtime errors
+    C05xx  Module / import errors
+    C09xx  Internal / ICE errors
+
+--------------------------------------------------------------------------------
+C00xx — LEXICAL ERRORS
+--------------------------------------------------------------------------------
+
+C0001  Unterminated string literal
+       Cause: A " was opened but never closed.
+       Fix:   Close the string, or use """ for multi-line.
+
+C0002  Invalid number literal
+       Cause: A numeric token contains an illegal character (e.g. 0x without
+              hex digits, or 1.2.3).
+       Fix:   Check the literal syntax.
+
+C0003  Invalid character
+       Cause: The source contains a character the lexer doesn't recognize.
+       Fix:   Remove or replace the character.
+
+C0004  Unterminated multi-line string
+       Cause: A """ was opened but never closed.
+       Fix:   Close with """.
+
+C0005  Indentation error
+       Cause: Mixed tabs and spaces, or inconsistent indentation depth.
+       Fix:   Use spaces only (4 per level).
+
+--------------------------------------------------------------------------------
+C01xx — PARSE ERRORS
+--------------------------------------------------------------------------------
+
+C0010  Unexpected indent/dedent
+       Cause: The indentation level doesn't match the surrounding block.
+       Fix:   Align indentation with the block's opening level.
+
+C0011  Unexpected token
+       Cause: The parser expected one token but got another.
+       Fix:   Check the syntax against the SYNTAX_REFERENCE.txt.
+
+C0012  Missing /end
+       Cause: A block was opened but never closed with /end.
+       Fix:   Add /end at the block's indentation level.
+
+C0013  Missing closing bracket
+       Cause: ( [ { was opened but never closed.
+       Fix:   Add the matching ), ], or }.
+
+C0014  Invalid assignment target
+       Cause: The left side of = is not a valid assignee.
+       Fix:   Use an identifier, member access, or index expression.
+
+C0015  Missing comma
+       Cause: The comma-delimited syntax requires a comma where one is missing.
+       Fix:   Add the comma (Vredrs uses comma-first style: `set, x = 1`).
+
+C0016  Invalid annotation syntax
+       Cause: An @annotation is malformed.
+       Fix:   Use @name or @name(args).
+
+C0017  Missing 'as' in import/with
+       Cause: `import, "mod", alias` is missing the `as` keyword.
+       Fix:   Write `import, "mod", as, alias`.
+
+C0020  Unclosed block, expected /end
+       Cause: The parser reached EOF inside a block.
+       Fix:   Add /end.
+
+C0021  Expected expression
+       Cause: The parser expected an expression but found a keyword or EOF.
+       Fix:   Provide the missing expression.
+
+--------------------------------------------------------------------------------
+C02xx — SEMANTIC ERRORS
+--------------------------------------------------------------------------------
+
+C0201  Undefined symbol
+       Cause: A name is used that was never declared or imported.
+       Fix:   Declare the name, or import it.
+
+C0202  Symbol redefinition
+       Cause: A name is declared twice in the same scope.
+       Fix:   Rename one of the declarations.
+
+C0203  Type mismatch
+       Cause: An expression's type doesn't match what's expected.
+       Fix:   Add a cast or fix the expression.
+
+C0204  Wrong number of arguments
+       Cause: A function is called with the wrong arg count.
+       Fix:   Check the function's parameter list.
+
+C0205  Not iterable
+       Cause: A non-iterable value is used in a for-in loop.
+       Fix:   Use a list, tuple, str, dict, set, or object with __iter__.
+
+C0206  Not callable
+       Cause: A non-function value is called.
+       Fix:   Ensure the value is a function, class, or object with __call__.
+
+C0207  Unreachable code
+       Cause: Code appears after a return/break/continue that always executes.
+       Fix:   Remove the dead code.
+
+C0208  Unused variable
+       Cause: A variable is declared but never used.
+       Fix:   Remove it or prefix with _ to suppress.
+
+--------------------------------------------------------------------------------
+C03xx — CODEGEN ERRORS
+--------------------------------------------------------------------------------
+
+C0080  Codegen error (generic)
+       Cause: The backend cannot lower a construct. Common sub-cases:
+              - "expr X not lowered"     — expression kind not supported
+              - "stmt X not lowered"     — statement kind not supported
+              - "only direct fn calls supported"
+              - "with manager must be object or file handle"
+              - "method call needs object receiver"
+       Fix:   See the specific message; use the interpreter if the native
+              backend doesn't support a feature yet.
+
+C0081  Missing function signature
+       Cause: A function is called but its signature wasn't collected.
+       Fix:   Ensure the function is defined before use.
+
+C0082  Vtable index out of range
+       Cause: A method call resolves to an invalid vtable slot.
+       Fix:   This is likely a compiler bug; report it.
+
+C0083  Missing class
+       Cause: A class is referenced but not defined in this module.
+       Fix:   Define the class or import it.
+
+--------------------------------------------------------------------------------
+C04xx — RUNTIME ERRORS
+--------------------------------------------------------------------------------
+
+C0401  Division by zero
+       Cause: An integer division or modulo by zero.
+       Fix:   Check the divisor before dividing.
+
+C0402  Index out of bounds
+       Cause: A list/tuple/str index is outside the valid range.
+       Fix:   Bounds-check the index.
+
+C0403  Key not found
+       Cause: A dict lookup with a missing key and no default.
+       Fix:   Use dict_get(d, k, default) or check dict_has first.
+
+C0404  Null reference
+       Cause: A null value is used where a non-null value is expected.
+       Fix:   Check for null before access, or use ??.
+
+C0405  Type error
+       Cause: An operation is applied to a value of the wrong type.
+       Fix:   Check the type with type_of() or add a cast.
+
+C0406  Recursion depth exceeded
+       Cause: A function recursed deeper than max_depth (default 512).
+       Fix:   Rewrite iteratively, or raise the limit with
+              set_recursion_limit(n).
+
+C0407  Unhandled exception
+       Cause: A throw escaped all try/catch blocks.
+       Fix:   Wrap the throwing code in try/catch.
+
+C0408  File not found
+       Cause: open() or read_file() can't find the path.
+       Fix:   Check the path and permissions.
+
+C0409  I/O error
+       Cause: A file read/write failed.
+       Fix:   Check the file handle and permissions.
+
+C0410  Iterator exhausted
+       Cause: next() called on an exhausted iterator.
+       Fix:   Check for stop() before calling next().
+
+--------------------------------------------------------------------------------
+C05xx — MODULE / IMPORT ERRORS
+--------------------------------------------------------------------------------
+
+C0501  Module not found
+       Cause: import references a module that can't be resolved.
+       Fix:   Check the path; Vredrs looks for module.veds relative to
+              the importing file's directory.
+
+C0502  Circular import
+       Cause: Module A imports B which imports A (directly or transitively).
+       Fix:   Break the cycle by moving shared code to a third module.
+
+C0503  Symbol not exported
+       Cause: import asks for a symbol the module doesn't export.
+       Fix:   Add `export, symbol` to the module, or fix the name.
+
+C0504  Module I/O error
+       Cause: The module file exists but can't be read.
+       Fix:   Check file permissions.
+
+--------------------------------------------------------------------------------
+C09xx — INTERNAL ERRORS (ICE)
+--------------------------------------------------------------------------------
+
+C0901  Internal compiler error
+       Cause: The compiler hit an unreachable state. This is always a bug.
+       Fix:   Report the issue with the source file that triggered it.
+
+C0902  Stack overflow
+       Cause: The compiler's own recursion exceeded the OS stack.
+       Fix:   Simplify the deeply-nested input.
+
+================================================================================

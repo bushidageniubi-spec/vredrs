@@ -1,0 +1,3 @@
+# Vredrs interpreter builtin module facade.
+# import, "time" exposes sleep(ms) and now(); implementations are native.
+export, sleep, now

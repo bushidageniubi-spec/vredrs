@@ -1,0 +1,12 @@
+# Test std/io module
+set, content, "hello from io test\n"
+set, written, write_file("/tmp/vredrs_io_test.txt", content)
+paste, "wrote "
+paste, written
+paste, " bytes\n"
+set, data, read_file("/tmp/vredrs_io_test.txt")
+paste, "read: "
+paste, data
+if, file_exists("/tmp/vredrs_io_test.txt")
+    paste, "exists\n"
+/end

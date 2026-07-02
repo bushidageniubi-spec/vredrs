@@ -1,0 +1,30 @@
+paste, "=== Class Tests ===\n"
+class, Animal
+    fn, new(name)
+        set, self.name, name
+        return, self
+    /end
+    fn, speak()
+        paste, self.name
+        paste, " makes a sound\n"
+    /end
+/end
+class, Dog, extends, Animal
+    fn, speak()
+        paste, self.name
+        paste, " barks\n"
+    /end
+    fn, fetch()
+        paste, self.name
+        paste, " fetches\n"
+    /end
+/end
+set, a, Animal("Generic")
+a.speak()
+set, d, Dog("Rex")
+d.speak()
+d.fetch()
+set, d.color, "brown"
+paste, "color: "
+paste, d.color
+paste, "\n"

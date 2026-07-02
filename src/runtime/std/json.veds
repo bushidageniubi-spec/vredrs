@@ -1,0 +1,16 @@
+# JSON library
+#
+# Provides `parse(text)` to decode a JSON string into Vredrs values, and
+# `stringify(value)` to encode a Vredrs value as JSON text.
+#
+# The actual parsing/serialization is done by native VM builtins
+# (`json_parse` and `json_stringify`) for performance and correctness.
+# This module just re-exports them under the `json` namespace.
+
+fn, stringify(value)
+    return, json_stringify(value)
+/end
+
+fn, parse(text)
+    return, json_parse(text)
+/end

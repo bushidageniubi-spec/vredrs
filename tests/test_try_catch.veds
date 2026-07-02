@@ -1,0 +1,8 @@
+try
+    throw, "error1"
+catch, e
+    paste, "caught: "
+    paste, e
+    paste, "\n"
+/end
+paste, "after try\n"

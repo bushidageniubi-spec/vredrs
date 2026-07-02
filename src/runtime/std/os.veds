@@ -1,0 +1,4 @@
+# Vredrs interpreter builtin module facade.
+# import, "os" exposes args() and env(name?); filesystem helpers are global builtins:
+# read_dir(path), is_dir(path), is_file(path), path_join(...), basename(path), dirname(path).
+export, args, env

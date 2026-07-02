@@ -1,0 +1,3 @@
+set, text = "{\"x\": 42}"
+println, text
+println, len(text)

@@ -1,0 +1,44 @@
+paste, "=== Container Tests ===\n"
+set, l, [1, 2, 3, 4, 5]
+paste, "list: "
+for, x, in, l
+    paste, x
+    paste, " "
+/end
+paste, "\n"
+paste, "len: "
+paste, len(l)
+paste, "\n"
+paste, "l[2]: "
+paste, l[2]
+paste, "\n"
+set, l[0], 99
+paste, "l[0]: "
+paste, l[0]
+paste, "\n"
+set, d, {"a": 1, "b": 2, "c": 3}
+paste, "d[a]: "
+paste, d["a"]
+paste, "\n"
+set, d["d"], 4
+paste, "d[d]: "
+paste, d["d"]
+paste, "\n"
+set, t, (10, 20, 30)
+paste, "tuple[1]: "
+paste, t[1]
+paste, "\n"
+set, sq, [x * x for x in l]
+paste, "squares: "
+for, s, in, sq
+    paste, s
+    paste, " "
+/end
+paste, "\n"
+set, evens, [x for x in l if x % 2 == 0]
+paste, "evens: "
+for, e, in, evens
+    paste, e
+    paste, " "
+/end
+paste, "\n"

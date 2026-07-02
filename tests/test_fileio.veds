@@ -1,0 +1,12 @@
+paste, "=== File I/O Tests ===\n"
+set, content, "line 1\nline 2\nline 3\n"
+set, written, write_file("/tmp/vredrs_test_out.txt", content)
+paste, "wrote "
+paste, written
+paste, " bytes\n"
+set, read_back, read_file("/tmp/vredrs_test_out.txt")
+paste, "read: "
+paste, read_back
+if, file_exists("/tmp/vredrs_test_out.txt")
+    paste, "file exists\n"
+/end

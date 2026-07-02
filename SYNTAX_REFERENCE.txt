@@ -1,0 +1,340 @@
+================================================================================
+VREDRS SYNTAX REFERENCE  —  Version 0.1.1
+================================================================================
+
+This document is the canonical syntax reference for the Vredrs language.
+For each construct it shows: syntax, semantics, and a short example.
+
+--------------------------------------------------------------------------------
+1.  LEXICAL STRUCTURE
+--------------------------------------------------------------------------------
+
+Comments:
+    # single-line comment
+    ## doc comment (attached to the following declaration)
+
+Identifiers: start with a letter or underscore, followed by letters,
+digits, or underscores. Case-sensitive.
+
+Keywords:
+    set  let  fn  async  return  if  elif  else  while  for  in  loop
+    break  continue  match  try  catch  finally  throw  with  as  is
+    class  extends  struct  enum  trait  impl  import  export  spawn
+    yield  resume  defer  assert  panic  unsafe  asm  select  after
+    stop  freeze  step  true  false  null  super  self
+
+Operators:
+    +  -  *  /  //  %  **        arithmetic
+    ==  !=  <  >  <=  >=         comparison
+    and  or  not                 logical
+    &  |  ^  <<  >>              bitwise
+    =  +=  -=  *=  /=  :=        assignment
+    |>  ??  ?.  #                pipe, null-coalesce, optional-chain, length
+    ..  ...                      range (exclusive / inclusive)
+
+Punctuation:
+    ,  :  ;  (  )  [  ]  {  }  .  ->  =>  @  /
+
+Delimiters:
+    /end            closes a block (instead of indentation or braces)
+    /<directive>    directive block, e.g. /async, /if
+    /<scope>.       scope-prefixed block, e.g. /config.server.
+
+--------------------------------------------------------------------------------
+2.  TOP-LEVEL DECLARATIONS
+--------------------------------------------------------------------------------
+
+2.1  Variable binding
+        set, <name> = <expr>
+        set, <name>, <expr>          -- comma form (preferred)
+        let, <name> = <expr>         -- immutable binding
+
+2.2  Function
+        fn, <name>(<params>)
+            <body>
+        /end
+
+        async fn, <name>(<params>)   -- async function (returns coroutine)
+            <body>
+        /end
+
+        fn, <name>(<params>) = <expr>  -- single-expression body
+
+2.3  Class
+        class, <Name>
+            <field declarations>
+            fn, <method>(<params>) ... /end
+        /end
+
+        class, <Child>, extends, <Parent>
+            ...
+        /end
+
+2.4  Struct (value type)
+        struct, <Name>
+            <field>: <type>
+        /end
+
+2.5  Enum
+        enum, <Name>
+            Variant1
+            Variant2(data)
+        /end
+
+2.6  Import / Export
+        import, "<module>", as, <alias>
+        import, "<module>", <symbol1>, <symbol2>
+        export, <symbol1>, <symbol2>
+
+2.7  Annotations
+        @<name>(<args>)
+        @<name>
+        fn, <target>() ... /end
+
+        -- annotations are accessible at runtime via annotations(fn_name)
+
+2.8  Constexpr
+        constexpr, <name> = <expr>
+
+2.9  Lazy definition
+        lazy, <name> = <expr>
+
+--------------------------------------------------------------------------------
+3.  STATEMENTS
+--------------------------------------------------------------------------------
+
+3.1  Assignment
+        set, <target> = <expr>
+        set, <target> += <expr>
+        <target> = <expr>              -- bare assignment (table-assign)
+
+3.2  Control flow
+        if, <cond>
+            <body>
+        /end
+
+        if, <cond>
+            ...
+        elif, <cond>
+            ...
+        else
+            ...
+        /end
+
+        while, <cond>
+            <body>
+        /end
+
+        for, <var>, in, <iterable>
+            <body>
+        /end
+
+        for, <var>, in, <start> .. <end>
+            <body>
+        /end
+
+        loop
+            <body>
+        /end
+
+        break
+        continue
+
+3.3  Match
+        match, <expr>
+            <pat1> => <body1>
+            <pat2> => <body2>
+            else => <default>
+        /end
+
+3.4  Exception handling
+        try
+            <body>
+        catch, <var>
+            <handler>
+        finally
+            <cleanup>
+        /end
+
+        throw, <expr>
+        assert, <cond>
+        panic, <msg>
+
+3.5  Context manager
+        with, <manager>, as, <var>
+            <body>
+        /end
+
+        -- manager must define __enter__()/__exit__() or be a file handle
+
+3.6  Defer
+        defer, <stmt>                 -- runs when enclosing scope exits
+
+3.7  Spawn
+        spawn, <call>()               -- launch coroutine
+        spawn thread, <call>()        -- launch OS thread
+
+3.8  Yield (generators)
+        yield, <expr>
+
+3.9  Print / Paste / Input
+        println, <expr>               -- print line
+        paste, <expr>                 -- print without newline
+        print, <expr>                 -- alias for paste
+        input, <var>                  -- read line from stdin
+
+3.10 Delete
+        del, <target>
+
+--------------------------------------------------------------------------------
+4.  EXPRESSIONS
+--------------------------------------------------------------------------------
+
+4.1  Literals
+        42                  integer (i64)
+        3.14                float (f64)
+        true / false        boolean
+        null                null
+        "hello"             string
+        """multi-line"""    multi-line string
+        [1, 2, 3]           list
+        (1, 2, 3)           tuple
+        {1, 2, 3}           set
+        {"k": "v"}          dict
+
+4.2  String interpolation
+        "Hello, {name}!"
+        "{x + 1}"
+        -- interpolation calls to_str() on the expression
+
+4.3  Slice
+        list[1:4]           -- indices 1, 2, 3
+        list[:3]            -- first 3 elements
+        list[2:]            -- from index 2 to end
+        list[::-1]          -- reversed
+        str[:5]             -- first 5 characters
+
+4.4  Lambda / Closure
+        fn(x, y) x + y      -- single-expression lambda
+        fn(x) {
+            set, y = x * 2
+            return, y
+        /end}               -- block-bodied lambda (1.0: expression body only)
+
+4.5  Range
+        1 .. 10             -- [1, 2, ..., 9]
+        1 ... 10            -- [1, 2, ..., 10]
+        1 .. 10, step, 2   -- [1, 3, 5, 7, 9]
+
+4.6  Ternary
+        <cond> ? <then> : <else>
+
+4.7  Pipe
+        x |> f              -- f(x)
+        x |> f(a, b)        -- f(x, a, b)
+
+4.8  Null coalesce
+        a ?? b              -- a if a is not null, else b
+
+4.9  Optional chain
+        obj?.field          -- null if obj is null, else obj.field
+        obj?.method()       -- null if obj is null, else obj.method()
+
+4.10 Postfix
+        x#                  -- len(x) (shorthand)
+        x~                  -- reversed(x)
+        x^                  -- sorted ascending
+        x_                  -- sorted descending
+
+4.11 Comprehensions
+        [expr for x in iter if cond]          -- list comprehension
+        {k: v for k, v in iter}               -- dict comprehension
+        {expr for x in iter}                   -- set comprehension
+
+4.12 Cast
+        expr as Type         -- type cast (FFI / raw backend)
+
+4.13 Try-propagate
+        expr?                -- return error early if expr is error
+
+--------------------------------------------------------------------------------
+5.  OPERATOR OVERLOADING
+--------------------------------------------------------------------------------
+
+Classes can define:
+    __add__(other)          +
+    __sub__(other)          -
+    __mul__(other)          *
+    __div__(other)          /
+    __mod__(other)          %
+    __eq__(other)           ==
+    __lt__(other)           <
+    __getitem__(idx)        obj[idx]
+    __setitem__(idx, val)   obj[idx] = val
+    __delitem__(idx)        del obj[idx]
+    __call__(args...)       obj(args...)
+    __len__()               len(obj) / obj#
+    __str__()               str(obj)
+    __iter__()              iter(obj)
+    __enter__()             with obj as v
+    __exit__(err)           with ... /end (cleanup)
+
+--------------------------------------------------------------------------------
+6.  BUILT-IN FUNCTIONS
+--------------------------------------------------------------------------------
+
+Container:
+    len(x)                  length
+    range(start, end)       [start, start+1, ..., end-1]
+    range1(end)             [0, 1, ..., end-1]
+    enumerate(list)         [(0, x0), (1, x1), ...]
+    zip(a, b)               [(a0, b0), (a1, b1), ...]
+    sum(list)               sum of elements
+    min(list) / max(list)   minimum / maximum
+    sorted(list)            new sorted list
+    reversed(list)          new reversed list
+    map(fn, list)           apply fn to each element
+    filter(fn, list)        keep elements where fn returns truthy
+
+Type conversion:
+    int(x)                  to i64
+    float(x)                to f64
+    bool(x)                 to bool
+    str(x)                  to string
+    type_of(x)              type name string
+
+I/O:
+    print(x) / paste(x)     print without newline
+    println(x)              print with newline
+    input(prompt)           read line from stdin
+    open(path, mode)        open file, returns handle
+    read(handle, n)         read n bytes (or all if n < 0)
+    write(handle, s)        write string
+    close(handle)           close file
+    read_file(path)         read entire file
+    write_file(path, s)     write entire file
+    file_exists(path)       boolean
+
+Dict:
+    dict()                  new dict
+    dict_get(d, k)          get value
+    dict_set(d, k, v)       set value
+    dict_keys(d)            list of keys
+    dict_values(d)          list of values
+    dict_has(d, k)          boolean
+
+Reflection:
+    annotations(fn)         dict of fn's annotations
+    freeze(x)               make immutable
+    is_frozen(x)            boolean
+    set_recursion_limit(n)  set max call depth
+
+--------------------------------------------------------------------------------
+7.  FILE SUFFIXES
+--------------------------------------------------------------------------------
+
+    .veds       Vredrs source file (application / library / stdlib)
+    .cpps       Cstar bare-metal source file
+    vrs.toml    Package manager configuration
+
+================================================================================
