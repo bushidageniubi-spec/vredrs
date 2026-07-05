@@ -1,0 +1,9 @@
+# Cstar bare-metal test program for ARM Cortex-M3.
+# This program does integer arithmetic and returns.
+# Compile with: vredrs build --raw samples/simple.cpps
+
+fn, main()
+    set, x = 42
+    set, y = x + 8
+    return, y
+/end

@@ -1,0 +1,10 @@
+# Exception handling
+try
+    throw, "oops"
+catch, e
+    paste, "caught: "
+    paste, e
+    paste, "\n"
+finally
+    paste, "cleanup\n"
+/end

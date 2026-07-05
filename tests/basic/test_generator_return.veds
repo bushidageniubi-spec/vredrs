@@ -1,0 +1,16 @@
+# 生成器返回值测试 — generator return value
+fn, gen()
+    yield, 1
+    yield, 2
+    yield, 3
+    return, 99
+/end
+set, g = gen()
+set, v1 = resume(g)
+set, v2 = resume(g)
+set, v3 = resume(g)
+set, v4 = resume(g)
+println, v1
+println, v2
+println, v3
+println, v4

@@ -1,0 +1,8 @@
+# 转义字符测试 — escape characters in string literals
+set, s = "line1\nline2\nline3"
+println, s
+println, "tab\there"
+println, "quote:\"hi\""
+println, "backslash:\\"
+println, "null\0mid"
+println, "mix\t1\n2"

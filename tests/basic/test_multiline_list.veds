@@ -1,0 +1,20 @@
+# 多行列表测试 — multiline list literal spanning multiple source lines
+set, xs = [
+    1,
+    2,
+    3,
+    4,
+    5,
+]
+println, "len="
+println, len(xs)
+println, "first="
+println, xs[0]
+println, "last="
+println, xs[4]
+set, total = 0
+for, x, in, xs
+    total = total + x
+/end
+println, "sum="
+println, total

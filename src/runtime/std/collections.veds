@@ -1,0 +1,46 @@
+# Collections library
+#
+# Provides utility data structures built on dict/list. The functions are
+# self-contained: they don't call themselves by name, so there's no risk
+# of infinite recursion when imported via `import, "collections"`.
+
+fn, counter(items)
+    set, result, {}
+    for, item, in, items
+        set, key, str(item)
+        if, dict_has(result, key)
+            set, result, dict_set(result, key, dict_get(result, key) + 1)
+        else
+            set, result, dict_set(result, key, 1)
+        /end
+    /end
+    return, result
+/end
+
+fn, unique(items)
+    set, seen, {}
+    set, result, []
+    for, item, in, items
+        set, key, str(item)
+        if, not dict_has(seen, key)
+            set, seen, dict_set(seen, key, true)
+            set, result, result + [item]
+        /end
+    /end
+    return, result
+/end
+
+fn, group_by(items, keyfn)
+    set, result, {}
+    for, item, in, items
+        set, k, keyfn(item)
+        set, ks, str(k)
+        if, dict_has(result, ks)
+            set, lst, dict_get(result, ks)
+            set, result, dict_set(result, ks, lst + [item])
+        else
+            set, result, dict_set(result, ks, [item])
+        /end
+    /end
+    return, result
+/end

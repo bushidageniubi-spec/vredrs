@@ -1,0 +1,25 @@
+# Feature 7 test: range step parameter
+println, "=== 7. range step 参数 ==="
+
+for, i, in, 0..10 step 2
+    paste, i
+    paste, " "
+/end
+println, ""
+
+for, i, in, 10..0 step -2
+    paste, i
+    paste, " "
+/end
+println, ""
+
+# range literal with step (used as a list)
+set, evens = 0..10 step 2
+println, evens
+
+set, countdown = 10..0 step -1
+println, countdown
+
+# Step of 1 (default)
+set, full = 0..5
+println, full

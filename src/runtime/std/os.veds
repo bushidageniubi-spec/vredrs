@@ -1,0 +1,7 @@
+# OS module — host interaction for self-hosting.
+#
+# Exposes: args(), env(name?), setenv(key, val), exec(cmd, ...args),
+# system(cmd_str), cwd(), chdir(path).
+# All implementations are native VM builtins (os_* functions).
+
+export, args, env, setenv, exec, system, cwd, chdir

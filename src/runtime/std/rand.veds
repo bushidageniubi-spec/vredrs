@@ -1,0 +1,28 @@
+# Random number generation module
+import, "math", sqrt, pow
+
+fn, intn(n)
+    return, time_rand_int() % n
+/end
+
+fn, int(min, max)
+    return, time_rand_int() % (max - min + 1) + min
+/end
+
+fn, float()
+    return, time_rand_int() / 2147483647.0
+/end
+
+fn, bool()
+    return, time_rand_int() % 2 == 1
+/end
+
+fn, choice(lst)
+    set, n, len(lst)
+    if, n == 0
+        return, null
+    /end
+    return, lst[intn(n)]
+/end
+
+export, intn, int, float, bool, choice

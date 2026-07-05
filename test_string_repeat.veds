@@ -1,0 +1,8 @@
+# Test: string repeat via the * operator.
+# Before the fix, "ab" * 3 returned null because the Mul opcode only
+# handled numeric operands. After the fix, str * int (or int * str)
+# repeats the string.
+println, "ab" * 3
+println, 3 * "ab"
+println, "x" * 0
+# Expected output: ababab / ababab / (empty line)

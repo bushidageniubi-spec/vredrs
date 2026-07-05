@@ -1,0 +1,21 @@
+# Test: ClassName.new() constructor form.
+# Before the fix, Counter.new() returned null because the method-call
+# dispatch path did not treat a Value::Class receiver with method "new"
+# as a constructor — it fell through to the default "return null" arm.
+# After the fix, both Counter() and Counter.new() instantiate the class
+# and self-field mutations persist across method calls.
+class, Counter
+    fn, new()
+        set, self.count, 0
+        return, self
+    /end
+    fn, inc()
+        set, self.count, self.count + 1
+        return, self.count
+    /end
+/end
+set, c, Counter.new()
+println, c.inc()
+println, c.inc()
+println, c.inc()
+# Expected output: 1 / 2 / 3

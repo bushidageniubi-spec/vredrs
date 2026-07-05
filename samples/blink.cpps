@@ -1,0 +1,59 @@
+// ============================================================================
+// Vredrs Cstar — Bare-metal blink example for ARM Cortex-M3.
+//
+// This program toggles a GPIO pin in an infinite loop. It is designed to
+// be compiled with `vredrs build --raw samples/blink.cpps` and run in QEMU:
+//   qemu-system-arm -M lm3s6965evb -kernel blink.bin -nographic
+//
+// The LM3S6965 eval board has an LED on PF0. We use the SysTick timer
+// for a delay loop.
+// ============================================================================
+
+// Memory-mapped register addresses for LM3S6965.
+// GPIO Port F: base 0x40025000
+// SYSCTL:      base 0x400FE000
+// SYSTICK:     base 0xE000E010
+
+fn, main() -> i32
+    // Enable the GPIO port F clock.
+    // SYSCTL_RCGC2 = 0x400FE108
+    set, rcgc2 = 0x400FE108 as *u32
+    *rcgc2 = *rcgc2 | 0x20    // bit 5 = Port F
+
+    // Small delay for clock to stabilize.
+    set, i = 0
+    while, i < 1000
+        set, i = i + 1
+    /end
+
+    // Configure PF0 as output.
+    // GPIO_PORTF_DIR = 0x40025400
+    set, dir = 0x40025400 as *u32
+    *dir = *dir | 0x01        // bit 0 = output
+
+    // Enable PF0 digitally.
+    // GPIO_PORTF_DEN = 0x4002551C
+    set, den = 0x4002551C as *u32
+    *den = *den | 0x01
+
+    // Blink loop.
+    set, data = 0x400253FC as *u32   // GPIO_PORTF_DATA
+    set, on = 0
+    loop
+        if, on != 0
+            *data = *data | 0x01    // LED on
+            set, on = 0
+        else
+            *data = *data & ~0x01   // LED off
+            set, on = 1
+        /end
+
+        // Delay loop.
+        set, d = 0
+        while, d < 200000
+            set, d = d + 1
+        /end
+    /end
+
+    return, 0
+/end

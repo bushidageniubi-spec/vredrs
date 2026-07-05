@@ -1,0 +1,11 @@
+set, q = "\""
+println, "len of q:"
+println, len(q)
+println, "q is:"
+println, q
+set, x = "x"
+println, "x == q:"
+println, x == q
+set, dq = "\""
+println, "dq == q:"
+println, dq == q

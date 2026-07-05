@@ -1,0 +1,38 @@
+# Feature 3 test: enum exhaustiveness + enum values
+println, "=== 3. 枚举的穷尽性检查 ==="
+
+enum, Color
+    Red
+    Green
+    Blue
+/end
+
+set, c = Color.Red
+match, c
+    case, Color.Red
+        println, "红色"
+    case, Color.Green
+        println, "绿色"
+    case, Color.Blue
+        println, "蓝色"
+/end
+
+# Test enum values resolve and match
+set, g = Color.Green
+match, g
+    case, Color.Red
+        println, "这是红色"
+    case, Color.Green
+        println, "这是绿色"
+    case, Color.Blue
+        println, "这是蓝色"
+/end
+
+# Test with else (no warning)
+set, b = Color.Blue
+match, b
+    case, Color.Red
+        println, "r"
+    else
+        println, "not red"
+/end

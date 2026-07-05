@@ -1,0 +1,19 @@
+# Functions and recursion
+fn, factorial(n)
+    if, n <= 1
+        return, 1
+    /end
+    return, n * factorial(n - 1)
+/end
+fn, fib(n)
+    if, n < 2
+        return, n
+    /end
+    return, fib(n - 1) + fib(n - 2)
+/end
+paste, "5! = "
+paste, factorial(5)
+paste, "\n"
+paste, "fib(10) = "
+paste, fib(10)
+paste, "\n"

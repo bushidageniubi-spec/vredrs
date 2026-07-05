@@ -1,0 +1,7 @@
+# Test filesystem operations (interpreter mode)
+paste, "file_exists /tmp = "
+paste, file_exists("/tmp")
+paste, "\n"
+paste, "file_exists /nonexistent = "
+paste, file_exists("/nonexistent")
+paste, "\n"

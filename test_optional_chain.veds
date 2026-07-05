@@ -1,0 +1,5 @@
+set, obj, {"user": {"name": "Alice"}}
+set, name, obj?.user?.name
+set, missing, obj?.address?.city
+println, name
+println, missing

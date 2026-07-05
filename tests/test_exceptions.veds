@@ -1,0 +1,28 @@
+paste, "=== Exception Tests ===\n"
+try
+    paste, "in try\n"
+    throw, "oops"
+    paste, "after throw\n"
+catch, e
+    paste, "caught: "
+    paste, e
+    paste, "\n"
+finally
+    paste, "finally\n"
+/end
+paste, "after try\n"
+fn, risky(x)
+    if, x < 0
+        throw, "negative"
+    /end
+    return, x * 2
+/end
+try
+    paste, risky(5)
+    paste, "\n"
+    paste, risky(-1)
+catch, e2
+    paste, "caught: "
+    paste, e2
+    paste, "\n"
+/end

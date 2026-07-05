@@ -1,0 +1,16 @@
+# Feature 8 test: extern FFI
+println, "=== 8. extern FFI ==="
+
+extern fn, printf(fmt: str, ...): int
+extern fn, puts(s: str): int
+extern fn, strlen(s: str): int
+extern fn, atoi(s: str): int
+extern fn, abs(n: int): int
+
+printf("Hello, %s\n", "World")
+printf("%d + %d = %d\n", 2, 3, 5)
+printf("hex: %x\n", 255)
+puts("from puts")
+println, strlen("hello")
+println, atoi("42")
+println, abs(-7)

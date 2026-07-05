@@ -1,0 +1,436 @@
+# Networking library
+#
+# Provides TCP/UDP/HTTP client skeletons. The Vredrs VM runs in a
+# single-threaded, sandboxed environment without direct socket access,
+# so these functions are intentionally minimal — they define the API
+# surface and return structured results that a host application can
+# use to perform the actual network I/O.
+#
+# In a future release with native socket support, these skeletons will
+# be backed by real implementations. Today, they are useful for:
+#   - Defining the wire format of HTTP requests.
+#   - Building request payloads.
+#   - Parsing simple HTTP responses.
+#   - Mocking network calls in tests.
+
+# ----- TCP client -----
+
+fn, tcp_connect(host, port)
+    # Returns a handle representing a TCP connection. In the current
+    # VM, this is a dict with the connection metadata; the host
+    # application is responsible for opening the actual socket.
+    return, {
+        kind: "tcp",
+        host: host,
+        port: port,
+        connected: true,
+        buffer: "",
+    }
+/end
+
+fn, tcp_send(conn, data)
+    # Append `data` to the connection's send buffer.
+    if, conn["kind"] != "tcp"
+        return, false
+    /end
+    set, buf, conn["buffer"]
+    set, buf, buf + data
+    set, conn, dict_set(conn, "buffer", buf)
+    return, true
+/end
+
+fn, tcp_recv(conn, n)
+    # Return up to `n` bytes from the connection's receive buffer. In
+    # this skeleton, the receive buffer is always empty — the host
+    # application must populate it via `tcp_set_recv_buffer`.
+    if, conn["kind"] != "tcp"
+        return, ""
+    /end
+    return, ""
+/end
+
+fn, tcp_close(conn)
+    if, conn["kind"] != "tcp"
+        return, false
+    /end
+    set, conn, dict_set(conn, "connected", false)
+    return, true
+/end
+
+# ----- UDP client -----
+
+fn, udp_socket()
+    return, {kind: "udp", bound: false, buffer: ""}
+/end
+
+fn, udp_send_to(sock, host, port, data)
+    if, sock["kind"] != "udp"
+        return, false
+    /end
+    # In a real implementation, this would send a datagram.
+    # Here we just record the destination and payload.
+    set, sock, dict_set(sock, "last_dest", host + ":" + str(port))
+    set, sock, dict_set(sock, "last_payload", data)
+    return, true
+/end
+
+fn, udp_recv_from(sock, n)
+    if, sock["kind"] != "udp"
+        return, ""
+    /end
+    return, ""
+/end
+
+fn, udp_close(sock)
+    if, sock["kind"] != "udp"
+        return, false
+    /end
+    set, sock, dict_set(sock, "bound", false)
+    return, true
+/end
+
+# ----- HTTP client -----
+
+fn, http_get(url)
+    # Issue an HTTP GET request and return a response dict:
+    #   {status: 200, headers: {...}, body: "..."}
+    # This skeleton parses the URL and builds the request line, but
+    # doesn't actually open a socket — the host application must
+    # execute the request and call `http_set_response`.
+    set, parsed, http_parse_url(url)
+    set, req, http_build_request("GET", parsed, "", dict())
+    return, {status: 0, headers: dict(), body: "", request: req}
+/end
+
+fn, http_post(url, body)
+    set, parsed, http_parse_url(url)
+    set, headers, dict()
+    set, headers, dict_set(headers, "Content-Type", "application/octet-stream")
+    set, headers, dict_set(headers, "Content-Length", str(len(body)))
+    set, req, http_build_request("POST", parsed, body, headers)
+    return, {status: 0, headers: dict(), body: "", request: req}
+/end
+
+fn, http_post_json(url, body)
+    set, parsed, http_parse_url(url)
+    set, headers, dict()
+    set, headers, dict_set(headers, "Content-Type", "application/json")
+    set, headers, dict_set(headers, "Content-Length", str(len(body)))
+    set, req, http_build_request("POST", parsed, body, headers)
+    return, {status: 0, headers: dict(), body: "", request: req}
+/end
+
+fn, http_request(method, url, headers, body)
+    set, parsed, http_parse_url(url)
+    return, http_build_request(method, parsed, body, headers)
+/end
+
+fn, http_parse_url(url)
+    # Parse a URL into {scheme, host, port, path, query}.
+    set, result, {scheme: "http", host: "", port: 80, path: "/", query: ""}
+    set, i, 0
+    set, n, len(url)
+    # Parse scheme: "http://" or "https://"
+    if, n >= 7
+        if, url[:7] == "http://"
+            set, result, dict_set(result, "scheme", "http")
+            set, result, dict_set(result, "port", 80)
+            set, i, 7
+        /end
+    /end
+    if, n >= 8
+        if, url[:8] == "https://"
+            set, result, dict_set(result, "scheme", "https")
+            set, result, dict_set(result, "port", 443)
+            set, i, 8
+        /end
+    /end
+    # Parse host (until ":" port, "/", "?", or end).
+    set, host, ""
+    while, i < n
+        set, c, url[i]
+        if, c == ":"
+            break
+        /end
+        if, c == "/"
+            break
+        /end
+        if, c == "?"
+            break
+        /end
+        set, host, host + c
+        set, i, i + 1
+    /end
+    set, result, dict_set(result, "host", host)
+    # Parse port if present.
+    if, i < n
+        if, url[i] == ":"
+            set, i, i + 1
+            set, port_str, ""
+            while, i < n
+                set, c, url[i]
+                if, c >= "0"
+                    if, c <= "9"
+                        set, port_str, port_str + c
+                        set, i, i + 1
+                    else
+                        break
+                    /end
+                else
+                    break
+                /end
+            /end
+            if, len(port_str) > 0
+                set, result, dict_set(result, "port", int(port_str))
+            /end
+        /end
+    /end
+    # Parse path.
+    set, path, "/"
+    if, i < n
+        if, url[i] == "/"
+            set, path, ""
+            while, i < n
+                set, c, url[i]
+                if, c == "?"
+                    break
+                /end
+                set, path, path + c
+                set, i, i + 1
+            /end
+        /end
+    /end
+    set, result, dict_set(result, "path", path)
+    # Parse query.
+    if, i < n
+        if, url[i] == "?"
+            set, i, i + 1
+            set, query, ""
+            while, i < n
+                set, query, query + url[i]
+                set, i, i + 1
+            /end
+            set, result, dict_set(result, "query", query)
+        /end
+    /end
+    return, result
+/end
+
+fn, http_build_request(method, parsed, body, headers)
+    # Build the raw HTTP/1.1 request text.
+    set, path, parsed["path"]
+    if, len(parsed["query"]) > 0
+        set, path, path + "?" + parsed["query"]
+    /end
+    set, req, method + " " + path + " HTTP/1.1\r\n"
+    set, req, req + "Host: " + parsed["host"]
+    if, parsed["port"] != 80
+        if, parsed["port"] != 443
+            set, req, req + ":" + str(parsed["port"])
+        /end
+    /end
+    set, req, req + "\r\n"
+    set, req, req + "Connection: close\r\n"
+    set, req, req + "User-Agent: vredrs/0.1.1\r\n"
+    set, keys, dict_keys(headers)
+    for, key, in, keys
+        set, val, dict_get(headers, key)
+        set, req, req + key + ": " + val + "\r\n"
+    /end
+    if, len(body) > 0
+        set, req, req + "Content-Length: " + str(len(body)) + "\r\n"
+    /end
+    set, req, req + "\r\n"
+    set, req, req + body
+    return, req
+/end
+
+fn, http_parse_response(text)
+    # Parse a raw HTTP response into {status, headers, body}.
+    set, result, {status: 0, headers: dict(), body: ""}
+    set, i, 0
+    set, n, len(text)
+    # Parse status line: "HTTP/1.1 200 OK\r\n"
+    set, line, ""
+    while, i < n
+        set, c, text[i]
+        set, i, i + 1
+        if, c == "\n"
+            break
+        /end
+        if, c != "\r"
+            set, line, line + c
+        /end
+    /end
+    # Extract status code from "HTTP/1.1 200 OK".
+    set, parts, _split_space(line)
+    if, len(parts) >= 2
+        set, result, dict_set(result, "status", int(parts[1]))
+    /end
+    # Parse headers until empty line.
+    while, i < n
+        set, line, ""
+        while, i < n
+            set, c, text[i]
+            set, i, i + 1
+            if, c == "\n"
+                break
+            /end
+            if, c != "\r"
+                set, line, line + c
+            /end
+        /end
+        if, len(line) == 0
+            break
+        /end
+        set, colon, _find_char(line, ":")
+        if, colon >= 0
+            set, key, line[:colon]
+            set, val, line[colon + 1:]
+            set, val, _trim(val)
+            set, headers, dict_get(result, "headers")
+            set, headers, dict_set(headers, key, val)
+            set, result, dict_set(result, "headers", headers)
+        /end
+    /end
+    # The rest is the body.
+    if, i < n
+        set, result, dict_set(result, "body", text[i:])
+    /end
+    return, result
+/end
+
+fn, _split_space(s)
+    set, result, []
+    set, current, ""
+    set, i, 0
+    set, n, len(s)
+    while, i < n
+        set, c, s[i]
+        if, c == " "
+            if, len(current) > 0
+                set, result, result + [current]
+                set, current, ""
+            /end
+        else
+            set, current, current + c
+        /end
+        set, i, i + 1
+    /end
+    if, len(current) > 0
+        set, result, result + [current]
+    /end
+    return, result
+/end
+
+fn, _find_char(s, ch)
+    set, i, 0
+    set, n, len(s)
+    while, i < n
+        if, s[i] == ch
+            return, i
+        /end
+        set, i, i + 1
+    /end
+    return, -1
+/end
+
+fn, _trim(s)
+    set, n, len(s)
+    set, start, 0
+    while, start < n
+        set, c, s[start]
+        if, c == " "
+        else
+            if, c == "\t"
+            else
+                if, c == "\n"
+                else
+                    if, c == "\r"
+                    else
+                        break
+                    /end
+                /end
+            /end
+        /end
+        set, start, start + 1
+    /end
+    set, end, n - 1
+    while, end >= start
+        set, c, s[end]
+        if, c == " "
+        else
+            if, c == "\t"
+            else
+                if, c == "\n"
+                else
+                    if, c == "\r"
+                    else
+                        break
+                    /end
+                /end
+            /end
+        /end
+        set, end, end - 1
+    /end
+    if, end < start
+        return, ""
+    /end
+    return, s[start:end + 1]
+/end
+
+fn, url_encode(s)
+    # Percent-encode a string for use in URLs.
+    set, out, ""
+    set, i, 0
+    set, n, len(s)
+    while, i < n
+        set, c, s[i]
+        if, c >= "a"
+            if, c <= "z"
+                set, out, out + c
+            /end
+        else
+            if, c >= "A"
+                if, c <= "Z"
+                    set, out, out + c
+                /end
+            else
+                if, c >= "0"
+                    if, c <= "9"
+                        set, out, out + c
+                    /end
+                else
+                    if, c == "-"
+                    else
+                        if, c == "_"
+                        else
+                            if, c == "."
+                            else
+                                if, c == "~"
+                                else
+                                    set, out, out + "%" + _hex_upper(c)
+                                /end
+                            /end
+                        /end
+                    /end
+                /end
+            /end
+        /end
+        set, i, i + 1
+    /end
+    return, out
+/end
+
+fn, _hex_upper(c)
+    # Return the 2-digit uppercase hex of a character's codepoint.
+    set, cp, int(c)
+    set, hi, cp / 16
+    set, lo, cp % 16
+    return, _hex_digit_char(hi) + _hex_digit_char(lo)
+/end
+
+fn, _hex_digit_char(d)
+    set, table, "0123456789ABCDEF"
+    return, table[d]
+/end
