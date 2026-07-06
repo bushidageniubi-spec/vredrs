@@ -1,0 +1,35 @@
+# Feature 10 test: macro definition and expansion
+println, "=== 10. macro 宏定义与展开 ==="
+
+macro, check(cond, msg)
+    if, not cond
+        throw, msg
+    /end
+/end
+
+# Use the macro — it expands to the if/throw body.
+set, x = 10
+check(x > 5, "x must be > 5")
+println, "check 1 passed"
+
+set, y = 3
+check(y > 0, "y must be positive")
+println, "check 2 passed"
+
+macro, debug_print(val)
+    println, "DEBUG: " + str(val)
+/end
+
+debug_print(42)
+debug_print("hello")
+debug_print([1, 2, 3])
+
+macro, assert_eq(a, b)
+    if, not (a == b)
+        throw, "assertion failed: " + str(a) + " != " + str(b)
+    /end
+/end
+
+assert_eq(1 + 1, 2)
+assert_eq("hello" + " " + "world", "hello world")
+println, "all assert_eq passed"

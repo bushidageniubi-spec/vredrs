@@ -1,0 +1,477 @@
+================================================================================
+VREDRS ERROR HANDBOOK  —  Version 0.1.4
+================================================================================
+
+This handbook lists every error code, its meaning, common causes, and
+suggested fixes. Errors are grouped by phase: Lexical, Parse, Semantic,
+Codegen, Runtime.
+
+0.1.4 introduces the V-series error codes (V0001–V5004), which are
+phase-and-file-type-specific. The legacy C-series (C0001–C0990) is
+retained for backward compatibility. See the V-series section at the end.
+
+--------------------------------------------------------------------------------
+ERROR CODE FORMAT
+--------------------------------------------------------------------------------
+
+Vredrs errors carry a code. Two series coexist:
+
+  C-series (legacy, 0.1.x):  C0NNN
+  V-series (0.1.4):          VNNNN  — phase + file-type specific
+
+C-series groups:
+
+    C00xx  Lexical errors
+    C01xx  Parse errors
+    C02xx  Semantic errors
+    C03xx  Codegen errors
+    C04xx  Runtime errors
+    C05xx  Module / import errors
+    C09xx  Internal / ICE errors
+
+V-series ranges (see the V-series section at the end of this file):
+
+    V0001–V0999   shared (lex / syntax / type / scope / semantic / pattern)
+    V1000–V1999   .veds interpreter / dynamic
+    V2000–V2999   .vraw static compilation (ownership / borrow / lifetime / linear)
+    V3000–V3999   .cpps bare-metal (interrupt / memory-map / DMA / linker)
+    V4000–V4999   shared file / IO / module
+    V5000–V5999   shared config / build / toolchain
+
+--------------------------------------------------------------------------------
+ERROR RENDERING (0.1.4)
+--------------------------------------------------------------------------------
+
+Errors render with a structured, source-aware format:
+
+    -- <Category> ------------------------------------------- [<CODE>]
+
+      +--[<file>:<line>:<col>]
+      |
+    <line> | <source line>
+        |   <^^^ marker>
+        |
+        \--  <message>
+
+      Suggestion: <suggestion>
+    -- The Author insists: "<quote>"
+
+By default the output is ANSI-colored:
+    • red    — category header, marker, message
+    • cyan   — file locator + line gutters
+    • white  — source line
+    • green  — "Suggestion:" label
+    • magenta — "The Author insists:" label
+
+To disable color, set the NO_COLOR environment variable (any value):
+
+    $ NO_COLOR=1 vredrs run main.veds
+    $ export NO_COLOR=     # disable for the whole session
+
+When NO_COLOR is set, the plain (uncolored) renderer is used. The
+suggestion is taken from the error's explicit `.with_suggestion(...)` if
+present, otherwise from a per-code default. The "Author insists" quote is
+deterministic (stable hash of message + code) so the same error always
+produces the same quote.
+
+--------------------------------------------------------------------------------
+C00xx — LEXICAL ERRORS
+--------------------------------------------------------------------------------
+
+C0001  Unterminated string literal
+       Cause: A " was opened but never closed.
+       Fix:   Close the string, or use """ for multi-line.
+
+C0002  Invalid number literal
+       Cause: A numeric token contains an illegal character (e.g. 0x without
+              hex digits, or 1.2.3).
+       Fix:   Check the literal syntax.
+
+C0003  Invalid character
+       Cause: The source contains a character the lexer doesn't recognize.
+       Fix:   Remove or replace the character.
+
+C0004  Unterminated multi-line string
+       Cause: A """ was opened but never closed.
+       Fix:   Close with """.
+
+C0005  Indentation error
+       Cause: Mixed tabs and spaces, or inconsistent indentation depth.
+       Fix:   Use spaces only (4 per level).
+
+--------------------------------------------------------------------------------
+C01xx — PARSE ERRORS
+--------------------------------------------------------------------------------
+
+C0010  Unexpected indent/dedent
+       Cause: The indentation level doesn't match the surrounding block.
+       Fix:   Align indentation with the block's opening level.
+
+C0011  Unexpected token
+       Cause: The parser expected one token but got another.
+       Fix:   Check the syntax against the SYNTAX_REFERENCE.txt.
+
+C0012  Missing /end
+       Cause: A block was opened but never closed with /end.
+       Fix:   Add /end at the block's indentation level.
+
+C0013  Missing closing bracket
+       Cause: ( [ { was opened but never closed.
+       Fix:   Add the matching ), ], or }.
+
+C0014  Invalid assignment target
+       Cause: The left side of = is not a valid assignee.
+       Fix:   Use an identifier, member access, or index expression.
+
+C0015  Missing comma
+       Cause: The comma-delimited syntax requires a comma where one is missing.
+       Fix:   Add the comma (Vredrs uses comma-first style: `set, x = 1`).
+
+C0016  Invalid annotation syntax
+       Cause: An @annotation is malformed.
+       Fix:   Use @name or @name(args).
+
+C0017  Missing 'as' in import/with
+       Cause: `import, "mod", alias` is missing the `as` keyword.
+       Fix:   Write `import, "mod", as, alias`.
+
+C0020  Unclosed block, expected /end
+       Cause: The parser reached EOF inside a block.
+       Fix:   Add /end.
+
+C0021  Expected expression
+       Cause: The parser expected an expression but found a keyword or EOF.
+       Fix:   Provide the missing expression.
+
+--------------------------------------------------------------------------------
+C02xx — SEMANTIC ERRORS
+--------------------------------------------------------------------------------
+
+C0201  Undefined symbol
+       Cause: A name is used that was never declared or imported.
+       Fix:   Declare the name, or import it.
+
+C0202  Symbol redefinition
+       Cause: A name is declared twice in the same scope.
+       Fix:   Rename one of the declarations.
+
+C0203  Type mismatch
+       Cause: An expression's type doesn't match what's expected.
+       Fix:   Add a cast or fix the expression.
+
+C0204  Wrong number of arguments
+       Cause: A function is called with the wrong arg count.
+       Fix:   Check the function's parameter list.
+
+C0205  Not iterable
+       Cause: A non-iterable value is used in a for-in loop.
+       Fix:   Use a list, tuple, str, dict, set, or object with __iter__.
+
+C0206  Not callable
+       Cause: A non-function value is called.
+       Fix:   Ensure the value is a function, class, or object with __call__.
+
+C0207  Unreachable code
+       Cause: Code appears after a return/break/continue that always executes.
+       Fix:   Remove the dead code.
+
+C0208  Unused variable
+       Cause: A variable is declared but never used.
+       Fix:   Remove it or prefix with _ to suppress.
+
+--------------------------------------------------------------------------------
+C03xx — CODEGEN ERRORS
+--------------------------------------------------------------------------------
+
+C0080  Codegen error (generic)
+       Cause: The backend cannot lower a construct. Common sub-cases:
+              - "expr X not lowered"     — expression kind not supported
+              - "stmt X not lowered"     — statement kind not supported
+              - "only direct fn calls supported"
+              - "with manager must be object or file handle"
+              - "method call needs object receiver"
+       Fix:   See the specific message; use the interpreter if the native
+              backend doesn't support a feature yet.
+
+C0081  Missing function signature
+       Cause: A function is called but its signature wasn't collected.
+       Fix:   Ensure the function is defined before use.
+
+C0082  Vtable index out of range
+       Cause: A method call resolves to an invalid vtable slot.
+       Fix:   This is likely a compiler bug; report it.
+
+C0083  Missing class
+       Cause: A class is referenced but not defined in this module.
+       Fix:   Define the class or import it.
+
+--------------------------------------------------------------------------------
+C04xx — RUNTIME ERRORS
+--------------------------------------------------------------------------------
+
+C0401  Division by zero
+       Cause: An integer division or modulo by zero.
+       Fix:   Check the divisor before dividing.
+
+C0402  Index out of bounds
+       Cause: A list/tuple/str index is outside the valid range.
+       Fix:   Bounds-check the index.
+
+C0403  Key not found
+       Cause: A dict lookup with a missing key and no default.
+       Fix:   Use dict_get(d, k, default) or check dict_has first.
+
+C0404  Null reference
+       Cause: A null value is used where a non-null value is expected.
+       Fix:   Check for null before access, or use ??.
+
+C0405  Type error
+       Cause: An operation is applied to a value of the wrong type.
+       Fix:   Check the type with type_of() or add a cast.
+
+C0406  Recursion depth exceeded
+       Cause: A function recursed deeper than max_depth (default 512).
+       Fix:   Rewrite iteratively, or raise the limit with
+              set_recursion_limit(n).
+
+C0407  Unhandled exception
+       Cause: A throw escaped all try/catch blocks.
+       Fix:   Wrap the throwing code in try/catch.
+
+C0408  File not found
+       Cause: open() or read_file() can't find the path.
+       Fix:   Check the path and permissions.
+
+C0409  I/O error
+       Cause: A file read/write failed.
+       Fix:   Check the file handle and permissions.
+
+C0410  Iterator exhausted
+       Cause: next() called on an exhausted iterator.
+       Fix:   Check for stop() before calling next().
+
+C0411  Method not found on class
+       Cause: A method call targeted a class that doesn't define (or inherit)
+              the named method.
+       Fix:   Define the method on the class or a parent, or check the spelling.
+
+C0412  Static method not supported on class
+       Cause: ClassName.method(args) was used with a method name other than
+              `new`. Only `ClassName.new(args)` (instantiation) is supported
+              as a static call on a class value.
+       Fix:   Use an instance method, or instantiate first with `ClassName.new()`.
+
+C0413  Object is not callable
+       Cause: A non-function, non-class value was invoked as a function, and
+              (for objects) the class does not define `__call__`.
+       Fix:   Define `__call__` on the class, or call a function/class instead.
+
+--------------------------------------------------------------------------------
+C05xx — MODULE / IMPORT ERRORS
+--------------------------------------------------------------------------------
+
+C0501  Module not found
+       Cause: import references a module that can't be resolved.
+       Fix:   Check the path; Vredrs looks for module.veds relative to
+              the importing file's directory.
+
+C0502  Circular import
+       Cause: Module A imports B which imports A (directly or transitively).
+       Fix:   Break the cycle by moving shared code to a third module.
+
+C0503  Symbol not exported
+       Cause: import asks for a symbol the module doesn't export.
+       Fix:   Add `export, symbol` to the module, or fix the name.
+
+C0504  Module I/O error
+       Cause: The module file exists but can't be read.
+       Fix:   Check file permissions.
+
+--------------------------------------------------------------------------------
+C09xx — INTERNAL ERRORS (ICE)
+--------------------------------------------------------------------------------
+
+C0901  Internal compiler error
+       Cause: The compiler hit an unreachable state. This is always a bug.
+       Fix:   Report the issue with the source file that triggered it.
+
+C0902  Stack overflow
+       Cause: The compiler's own recursion exceeded the OS stack.
+       Fix:   Simplify the deeply-nested input.
+
+================================================================================
+V-SERIES ERROR CODES  (0.1.4)
+================================================================================
+
+The V-series provides phase-and-file-type-specific error codes. Each code
+has a category, a default suggestion, and is rendered with the colored
+renderer described above.
+
+--------------------------------------------------------------------------------
+V0xxx — SHARED (lex / syntax / type / scope / semantic / pattern)
+--------------------------------------------------------------------------------
+
+V0001  Lexical error (shared)
+       Cause: Illegal character or unclosed string in any file type.
+       Fix:   Check for illegal characters or unclosed strings.
+
+V0010  Unclosed block (shared syntax)
+       Cause: A block was opened but never closed with /end.
+       Fix:   Add the missing /end for the open block.
+
+V0020  Indentation / dedent error (shared syntax)
+       Cause: Indentation level doesn't match the surrounding block.
+       Fix:   Align indentation with the surrounding block.
+
+V0030  Type mismatch (shared)
+       Cause: Both sides of an operation/assignment have incompatible types.
+       Fix:   Ensure both sides have compatible types.
+
+V0040  Undefined symbol (shared scope)
+       Cause: A name is used that was never declared or imported.
+       Fix:   Declare the symbol before use or import it.
+
+V0050  Duplicate declaration (shared semantic)
+       Cause: A name is declared twice in the same scope.
+       Fix:   Rename one of the duplicate declarations.
+
+V0060  Scope / visibility error (shared)
+       Cause: A variable is accessed outside its valid scope.
+       Fix:   Check variable scope and visibility.
+
+V0070  Non-exhaustive pattern match
+       Cause: A match statement doesn't cover all variants and has no else.
+       Fix:   Add a catch-all case or cover all variants.
+
+--------------------------------------------------------------------------------
+V1xxx — .veds INTERPRETER / DYNAMIC
+--------------------------------------------------------------------------------
+
+V1001  Runtime type error (.veds)
+       Cause: An operation is applied to a value of the wrong runtime type.
+       Fix:   Check the runtime type of the value.
+
+V1002  Coroutine state error (.veds)
+       Cause: resume() called on a coroutine in an invalid state.
+       Fix:   Verify coroutine state and resume logic.
+
+V1003  Unknown field (.veds)
+       Cause: An object field access targets a field that wasn't declared.
+       Fix:   Use a declared field instead of adding a new one.
+
+V1100  VM internal state error (.veds)
+       Cause: The bytecode VM reached an inconsistent internal state.
+       Fix:   Inspect the VM state and call stack.
+
+--------------------------------------------------------------------------------
+V2xxx — .vraw STATIC COMPILATION
+--------------------------------------------------------------------------------
+
+V2001  Ownership error (.vraw)
+       Cause: A value is used after being moved.
+       Fix:   Use `borrow(&data)` instead of moving the value.
+
+V2002  Shared borrow conflict (.vraw)
+       Cause: A mutable borrow was requested while a shared borrow is active.
+       Fix:   Ensure no other borrows are active.
+
+V2003  Mutable borrow conflict (.vraw)
+       Cause: Another borrow was requested while a mutable borrow is active.
+       Fix:   Drop the mutable borrow first.
+
+V2004  Lifetime error (.vraw)
+       Cause: A borrowed value doesn't live long enough.
+       Fix:   Ensure the borrowed value lives long enough.
+
+V2005  Linear type error (.vraw)
+       Cause: A linear resource (ptr[T]) is used after being consumed.
+       Fix:   Do not use a value after it has been moved.
+
+V2006  Static type error (.vraw)
+       Cause: A value doesn't match its declared static type.
+       Fix:   Ensure the value matches the declared type.
+
+V2007  Constexpr error (.vraw)
+       Cause: A non-constant expression appears in a constexpr context.
+       Fix:   Only use constant expressions in constexpr.
+
+V2008  Layout error (.vraw)
+       Cause: A struct field alignment or offset is invalid.
+       Fix:   Check struct field alignment and offset.
+
+V2009  Raw mode error (.vraw)
+       Cause: A dynamic feature (spawn, async, try/catch, GC) appears in a
+              .vraw file, which requires static semantics.
+       Fix:   This dynamic feature is not allowed in raw mode; move it to a
+              .veds file.
+
+--------------------------------------------------------------------------------
+V3xxx — .cpps BARE-METAL / HARDWARE
+--------------------------------------------------------------------------------
+
+V3001  Interrupt error (.cpps)
+       Cause: An invalid interrupt vector or handler configuration.
+       Fix:   Check interrupt vector and handler.
+
+V3002  Memory map error (.cpps)
+       Cause: An invalid memory region configuration (e.g. writing to
+              read-only Flash as if it were SRAM).
+       Fix:   Verify memory map configuration.
+
+V3003  DMA error (.cpps)
+       Cause: A DMA channel or buffer alignment is invalid.
+       Fix:   Check DMA channel and buffer alignment.
+
+V3004  Linker error (.cpps)
+       Cause: A linker script or segment layout is invalid.
+       Fix:   Review linker script and segment layout.
+
+V3005  Linear type error (.cpps)
+       Cause: A linear resource is used after consumption in bare-metal code.
+       Fix:   Do not use a linear resource after consumption.
+
+V3006  Packet layout error (.cpps)
+       Cause: A @repo package field offset or size is invalid.
+       Fix:   Check packet field offsets and sizes.
+
+--------------------------------------------------------------------------------
+V4xxx — SHARED FILE / IO / MODULE
+--------------------------------------------------------------------------------
+
+V4001  File not found
+       Cause: A source or data file can't be located.
+       Fix:   Check the file path and working directory.
+
+V4002  Module not found
+       Cause: import references a module that can't be resolved.
+       Fix:   Verify the module name and import path.
+
+V4003  File I/O error
+       Cause: A file exists but can't be read/written (permissions, disk).
+       Fix:   Check file permissions and disk space.
+
+V4004  Circular import
+       Cause: Module A imports B which imports A (directly or transitively).
+       Fix:   Remove circular import dependencies.
+
+--------------------------------------------------------------------------------
+V5xxx — SHARED CONFIG / BUILD / TOOLCHAIN
+--------------------------------------------------------------------------------
+
+V5001  Config syntax error
+       Cause: vrs.toml or a @repo block has invalid syntax.
+       Fix:   Check vrs.toml configuration syntax.
+
+V5002  Build directory error
+       Cause: The build target directory doesn't exist or isn't a directory.
+       Fix:   Ensure the build directory exists.
+
+V5003  Toolchain missing
+       Cause: A required toolchain (clang, as, ld) isn't installed.
+       Fix:   Install the required toolchain.
+
+V5004  Unsupported backend
+       Cause: An unknown --backend value was given.
+       Fix:   Use a supported backend (native | llvm-ir | raw).
+
+================================================================================

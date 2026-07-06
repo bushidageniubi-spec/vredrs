@@ -1,0 +1,555 @@
+================================================================================
+VREDRS SYNTAX REFERENCE  —  Version 0.1.4
+================================================================================
+
+This document is the canonical syntax reference for the Vredrs language.
+For each construct it shows: syntax, semantics, and a short example.
+
+Vredrs uses file extensions to route source through the right backend:
+  .veds  — dynamic (bytecode VM) or native (LLVM); full language
+  .vraw  — static native (raw backend: x86_64 / AArch64 / ARM32)
+  .cpps  — bare-metal firmware (Cstar backend)
+
+The raw backend and the Cstar backend are SEPARATE, independently-
+implemented code generators (see sections 5 and 6).
+
+--------------------------------------------------------------------------------
+1.  LEXICAL STRUCTURE
+--------------------------------------------------------------------------------
+
+Comments:
+    # single-line comment
+    ## doc comment (attached to the following declaration)
+
+Identifiers: start with a letter or underscore, followed by letters,
+digits, or underscores. Case-sensitive.
+
+Keywords:
+    set  let  fn  async  return  if  elif  else  while  for  in  loop
+    break  continue  match  try  catch  finally  throw  with  as  is
+    class  extends  struct  enum  trait  impl  import  export  spawn
+    yield  resume  defer  assert  panic  unsafe  asm  select  after
+    stop  freeze  step  true  false  null  super  self
+
+Operators:
+    +  -  *  /  //  %  **        arithmetic
+    ==  !=  <  >  <=  >=         comparison
+    and  or  not                 logical
+    &  |  ^  <<  >>              bitwise
+    =  +=  -=  *=  /=  :=        assignment
+    |>  ??  ?.  #                pipe, null-coalesce, optional-chain, length
+    ..  ...                      range (exclusive / inclusive)
+
+Punctuation:
+    ,  :  ;  (  )  [  ]  {  }  .  ->  =>  @  /
+
+Delimiters:
+    /end            closes a block (instead of indentation or braces)
+    /<directive>    directive block, e.g. /async, /if
+    /<scope>.       scope-prefixed block, e.g. /config.server.
+
+--------------------------------------------------------------------------------
+2.  TOP-LEVEL DECLARATIONS
+--------------------------------------------------------------------------------
+
+2.1  Variable binding
+        set, <name> = <expr>
+        set, <name>, <expr>          -- comma form (preferred)
+        let, <name> = <expr>         -- immutable binding
+
+2.2  Function
+        fn, <name>(<params>)
+            <body>
+        /end
+
+        async fn, <name>(<params>)   -- async function (returns coroutine)
+            <body>
+        /end
+
+        fn, <name>(<params>) = <expr>  -- single-expression body
+
+2.3  Class
+        class, <Name>
+            <field declarations>
+            fn, <method>(<params>) ... /end
+        /end
+
+        class, <Child>, extends, <Parent>
+            ...
+        /end
+
+        -- instantiation: both forms are equivalent
+        set, obj, ClassName(args)
+        set, obj, ClassName.new(args)
+
+        -- self.field = value persists on the instance across method calls;
+           super.method(args) dispatches to the parent class.
+
+2.4  Struct (value type)
+        struct, <Name>
+            <field>: <type>
+        /end
+
+2.5  Enum
+        enum, <Name>
+            Variant1
+            Variant2(data)
+        /end
+
+2.6  Import / Export
+        import, "<module>", as, <alias>
+        import, "<module>", <symbol1>, <symbol2>
+        export, <symbol1>, <symbol2>
+
+2.7  Annotations
+        @<name>(<args>)
+        @<name>
+        fn, <target>() ... /end
+
+        -- annotations are accessible at runtime via annotations(fn_name)
+
+2.8  Constexpr
+        constexpr, <name> = <expr>
+
+2.9  Lazy definition
+        lazy, <name> = <expr>
+
+2.10 Trait  (0.1.4 — raw / cstar static backends)
+        trait, <Name>
+            fn, <method>(<params>)
+            /end
+        /end
+
+        -- declares an interface; types implement it via `impl ... for ...`
+
+2.11 Impl  (0.1.4 — raw / cstar static backends)
+        impl, <Trait>, for, <Type>
+            fn, <method>(<params>)
+                <body>
+            /end
+        /end
+
+        -- provides trait method bodies for a concrete type
+
+2.12 Destructor  (0.1.4 — raw / cstar static backends)
+        dtor, <Type>
+            <cleanup body>
+        /end
+
+        -- runs when a value of <Type> goes out of scope (RAII cleanup)
+
+--------------------------------------------------------------------------------
+3.  STATEMENTS
+--------------------------------------------------------------------------------
+
+3.1  Assignment
+        set, <target> = <expr>
+        set, <target> += <expr>
+        <target> = <expr>              -- bare assignment (table-assign)
+
+3.2  Control flow
+        if, <cond>
+            <body>
+        /end
+
+        if, <cond>
+            ...
+        elif, <cond>
+            ...
+        else
+            ...
+        /end
+
+        while, <cond>
+            <body>
+        /end
+
+        for, <var>, in, <iterable>
+            <body>
+        /end
+
+        for, <var>, in, <start> .. <end>
+            <body>
+        /end
+
+        loop
+            <body>
+        /end
+
+        break
+        continue
+
+3.3  Match
+        match, <expr>
+            <pat1> => <body1>
+            <pat2> => <body2>
+            else => <default>
+        /end
+
+3.4  Exception handling
+        try
+            <body>
+        catch, <var>
+            <handler>
+        finally
+            <cleanup>
+        /end
+
+        throw, <expr>
+        assert, <cond>
+        panic, <msg>
+
+3.5  Context manager
+        with, <manager>, as, <var>
+            <body>
+        /end
+
+        -- manager must define __enter__()/__exit__() or be a file handle
+
+3.6  Defer
+        defer, <stmt>                 -- runs when enclosing scope exits
+
+3.7  Spawn
+        spawn, <call>()               -- launch coroutine
+        spawn thread, <call>()        -- launch OS thread
+
+3.8  Yield (generators)
+        yield, <expr>
+
+3.9  Print / Paste / Input
+        println, <expr>               -- print line
+        paste, <expr>                 -- print without newline
+        print, <expr>                 -- alias for paste
+        input, <var>                  -- read line from stdin
+
+3.10 Delete
+        del, <target>
+
+--------------------------------------------------------------------------------
+4.  EXPRESSIONS
+--------------------------------------------------------------------------------
+
+4.1  Literals
+        42                  integer (i64)
+        3.14                float (f64)
+        true / false        boolean
+        null                null
+        "hello"             string
+        """multi-line"""    multi-line string
+        [1, 2, 3]           list
+        (1, 2, 3)           tuple
+        {1, 2, 3}           set
+        {"k": "v"}          dict
+
+4.2  String interpolation
+        "Hello, {name}!"
+        "{x + 1}"
+        -- interpolation calls to_str() on the expression
+
+4.3  Slice
+        list[1:4]           -- indices 1, 2, 3
+        list[:3]            -- first 3 elements
+        list[2:]            -- from index 2 to end
+        list[::-1]          -- reversed
+        str[:5]             -- first 5 characters
+
+4.4  Lambda / Closure
+        fn(x, y) x + y      -- single-expression lambda
+        set, add, fn(x, y) x + y
+        set, r, add(3, 4)   -- 7
+
+        -- Lambdas capture their lexical environment at creation time.
+           Enclosing function parameters and locals remain visible inside
+           the lambda body even after the enclosing function returns.
+        fn, adder(n)
+            return, fn(x) x + n
+        /end
+        set, add5, adder(5)
+        paste, add5(3)      -- 8
+
+4.5  Range
+        1 .. 10             -- [1, 2, ..., 9]
+        1 ... 10            -- [1, 2, ..., 10]
+        1 .. 10, step, 2   -- [1, 3, 5, 7, 9]
+
+4.6  Ternary
+        <cond> ? <then> : <else>
+
+4.7  Pipe
+        x |> f              -- f(x)
+        x |> f(a, b)        -- f(x, a, b)
+
+4.8  Null coalesce
+        a ?? b              -- a if a is not null, else b
+
+4.9  Optional chain
+        obj?.field          -- null if obj is null, else obj.field
+        obj?.method()       -- null if obj is null, else obj.method()
+        obj?.[index]        -- null if obj is null, else obj[index]
+        a?.b?.c             -- chains short-circuit to null on the first null target
+        -- works on objects, modules, and dicts (string-key lookup)
+
+4.10 Postfix
+        x#                  -- len(x) (shorthand)
+        x~                  -- reversed(x)
+        x^                  -- sorted ascending
+        x_                  -- sorted descending
+
+4.11 String repeat
+        "ab" * 3            -- "ababab"
+        3 * "ab"            -- "ababab" (symmetric)
+        "x" * 0             -- "" (n <= 0 yields the empty string)
+
+4.12 Comprehensions
+        [expr for x in iter if cond]          -- list comprehension
+        {k: v for k, v in iter}               -- dict comprehension
+        {expr for x in iter}                   -- set comprehension
+
+4.13 Cast
+        expr as Type         -- type cast (FFI / raw backend)
+
+4.14 Try-propagate
+        expr?                -- return error early if expr is error
+
+--------------------------------------------------------------------------------
+5.  RAW STATIC SYNTAX  (.vraw files — raw backend)
+--------------------------------------------------------------------------------
+
+The raw backend compiles .vraw files directly to native machine code
+(x86_64 / AArch64 / ARM32) with zero runtime overhead: no GC, no scheduler,
+no runtime type tags. The following type syntax is available in .vraw files.
+
+5.1  Pointer type
+        ptr[T]                  -- pointer to a value of type T
+        set, p, 0x40020000 as ptr[u32]
+        p.load()                -- atomic read
+        p.store(0x1234)         -- atomic write
+        p.load_acquire()        -- acquire-order read
+        p.store_release(v)      -- release-order write
+
+5.2  Borrow types
+        &T                      -- shared borrow (immutable)
+        &mut T                  -- mutable borrow
+        fn, foo(data: &[u8])        -- shared borrow of a byte array
+        fn, bar(buf: &mut [u8])     -- mutable borrow
+        -- optional lifetime: &'a T, &'a mut T
+
+5.3  Fixed-width unsigned integers
+        u8                      -- 8-bit unsigned
+        u16                     -- 16-bit unsigned
+        u32                     -- 32-bit unsigned
+        u64                     -- 64-bit unsigned
+        set, count, 0 as u32
+
+5.4  Result type
+        Result[T, E]            -- success or error
+        fn, parse(s: str) -> Result[int, str]
+            if, s == ""
+                return, Err("empty input")
+            /end
+            return, Ok(42)
+        /end
+        -- use `expr?` to propagate errors (see 4.14)
+
+5.5  Linear type checking
+        ptr[T] resources MUST be consumed (moved or freed) before scope
+        exit. The linear checker (src/codegen/cstar/linear.rs) enforces this
+        at compile time — using a value after move is a V2005 error.
+
+--------------------------------------------------------------------------------
+6.  CSTAR BARE-METAL SYNTAX  (.cpps files — Cstar backend)
+--------------------------------------------------------------------------------
+
+The Cstar backend compiles .cpps files to bare-metal firmware (.bin / .elf).
+It is INDEPENDENT from the raw backend (different codegen pipeline, different
+runtime assumptions). The following syntax is specific to .cpps files.
+
+6.1  volatile modifier
+        volatile set, status_flag, 0x00
+        -- tells the compiler the value may change externally (hardware /
+           interrupt / DMA); every read/write is emitted as a real memory
+           access, never optimized away.
+
+6.2  align(N) modifier
+        align(64) struct, DMA_Descriptor
+            u32 src
+            u32 dst
+            u32 len
+            u32 ctrl
+        /end
+        -- forces N-byte alignment (DMA descriptors, cache-line buffers).
+
+6.3  Inline assembly
+        unsafe
+            asm {
+                "mov eax, 1"
+                "int 0x80"
+            }
+        /end
+        -- emits the assembly verbatim for the target architecture.
+
+6.4  Section placement
+        @section(".text.boot")
+        fn, _start()
+            <boot code>
+        /end
+        -- places the function/variable in the named linker section.
+
+6.5  @pipeline — DMA pipeline orchestration
+        @pipeline(priority="cpu_bound")
+        fn, process_data(src: ptr[u8], dst: ptr[u8], len: u32)
+            for, i, in, range(0, len)
+                <compute>
+            /end
+        /end
+        -- compile-time: splits the loop into compute windows + DMA transfer
+           windows; emits interleaved CPU/DMA instructions for zero-overhead
+           parallelism.
+
+6.6  @patch — firmware differential update
+        @patch(base="firmware_v1.bin", output="update.patch")
+        fn, build_new_firmware()
+            <new version code>
+        /end
+        -- compile-time: compares the new build against the base firmware,
+           computes byte-level diffs, and emits a .patch file for OTA updates.
+
+6.7  @isr_group — interrupt clustering
+        @isr_group(budget_us=50, priority="high")
+        fn, uart_isr()
+            <handler>
+        /end
+        -- compile-time: estimates the WCET (worst-case execution time) from
+           instruction count; rejects handlers exceeding the budget; assigns
+           optimal preemption priority via rate-monotonic scheduling.
+
+6.8  @prefetch — cache prefetch
+        @prefetch(hint="sequential", stride=64)
+        fn, process_array(arr: ptr[u32], len: u32)
+            for, i, in, range(0, len)
+                process(arr.load(i))
+            /end
+        /end
+        -- compile-time: splits the loop into prefetch windows + compute
+           windows; emits __builtin_prefetch with the given stride.
+
+6.9  @repo — physical package management
+        @repo {
+            sources: ["https://github.com/verse-pkg/", "local: ./vendor/"],
+            split_by: "size",
+            thresholds: {
+                sram:          [0, 4096],
+                flash_fast:    [4096, 32768],
+                flash_normal:  [32768, 524288],
+                flash_archive: [524288, 0]
+            },
+            output: { header: "flash_layout.h", map: "layout.map" }
+        }
+        import, "tiny_crypto"        -- auto-classified by compiled size
+        import, "big_assets" to flash_archive
+        -- compile-time: partitions packages by compiled binary size into the
+           configured storage regions, generates a PKG_INDEX offset table,
+           deduplicates by SHA-256 hash, and emits a linker-friendly header.
+
+--------------------------------------------------------------------------------
+7.  OPERATOR OVERLOADING
+--------------------------------------------------------------------------------
+
+Classes can define:
+    __add__(other)          +
+    __sub__(other)          -
+    __mul__(other)          *
+    __div__(other)          /
+    __mod__(other)          %
+    __eq__(other)           ==
+    __lt__(other)           <
+    __getitem__(idx)        obj[idx]
+    __setitem__(idx, val)   obj[idx] = val
+    __delitem__(idx)        del obj[idx]
+    __call__(args...)       obj(args...)
+    __len__()               len(obj) / obj#
+    __str__()               str(obj)
+    __iter__()              iter(obj)
+    __enter__()             with obj as v
+    __exit__(err)           with ... /end (cleanup)
+
+--------------------------------------------------------------------------------
+8.  BUILT-IN FUNCTIONS
+--------------------------------------------------------------------------------
+
+Container:
+    len(x)                  length
+    range(start, end)       [start, start+1, ..., end-1]
+    range1(end)             [0, 1, ..., end-1]
+    enumerate(list)         [(0, x0), (1, x1), ...]
+    zip(a, b)               [(a0, b0), (a1, b1), ...]
+    sum(list)               sum of elements
+    min(list) / max(list)   minimum / maximum
+    sorted(list)            new sorted list
+    reversed(list)          new reversed list
+    map(fn, list)           apply fn to each element
+    filter(fn, list)        keep elements where fn returns truthy
+
+Type conversion:
+    int(x)                  to i64
+    float(x)                to f64
+    bool(x)                 to bool
+    str(x)                  to string
+    type_of(x)              type name string
+
+I/O:
+    print(x) / paste(x)     print without newline
+    println(x)              print with newline
+    input(prompt)           read line from stdin
+    open(path, mode)        open file, returns handle
+    read(handle, n)         read n bytes (or all if n < 0)
+    write(handle, s)        write string
+    close(handle)           close file
+    read_file(path)         read entire file
+    write_file(path, s)     write entire file
+    file_exists(path)       boolean
+
+Dict:
+    dict()                  new dict
+    dict_get(d, k)          get value
+    dict_set(d, k, v)       set value
+    dict_keys(d)            list of keys
+    dict_values(d)          list of values
+    dict_has(d, k)          boolean
+
+Reflection:
+    annotations(fn)         dict of fn's annotations
+    freeze(x)               make immutable
+    is_frozen(x)            boolean
+    set_recursion_limit(n)  set max call depth
+
+--------------------------------------------------------------------------------
+9.  FILE SUFFIXES
+--------------------------------------------------------------------------------
+
+    .veds       Vredrs source — dynamic (VM) or native (LLVM)
+    .vraw       Vredrs raw source — static native (raw backend)
+    .cpps       Cstar source — bare-metal firmware (Cstar backend)
+    vrs.toml    Package manager configuration
+
+--------------------------------------------------------------------------------
+10.  ERROR CODES (0.1.4)
+--------------------------------------------------------------------------------
+
+Vredrs errors carry a code. Two series coexist:
+
+  C-series (legacy, 0.1.x):  C0001–C0990  (lexical / syntax / semantic / ...)
+  V-series (0.1.4):          V0001–V5004  (phase + file-type specific)
+
+V-series ranges:
+  V0001–V0999   shared (lex / syntax / type / scope / semantic / pattern)
+  V1000–V1999   .veds interpreter / dynamic
+  V2000–V2999   .vraw static compilation (ownership / borrow / lifetime / linear)
+  V3000–V3999   .cpps bare-metal (interrupt / memory-map / DMA / linker)
+  V4000–V4999   shared file / IO / module
+  V5000–V5999   shared config / build / toolchain
+
+Errors render with ANSI colors by default. Set the NO_COLOR environment
+variable to disable color. See ERROR_HANDBOOK.txt for the full list.
+
+================================================================================

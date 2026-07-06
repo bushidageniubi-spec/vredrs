@@ -1,0 +1,47 @@
+# Feature 2 test: Pattern::Or (|) in match
+println, "=== 2. 模式匹配 |（或模式）==="
+
+fn, classify(n)
+    match, n
+        case, 1 | 2 | 3
+            return, "小数字"
+        case, 4 | 5 | 6
+            return, "中数字"
+        case, _
+            return, "其他"
+    /end
+/end
+
+println, classify(1)
+println, classify(3)
+println, classify(5)
+println, classify(7)
+println, classify(10)
+
+# String or-pattern
+fn, day_type(d)
+    match, d
+        case, "Sat" | "Sun"
+            return, "周末"
+        case, "Mon" | "Tue" | "Wed" | "Thu" | "Fri"
+            return, "工作日"
+        case, _
+            return, "未知"
+    /end
+/end
+
+println, day_type("Mon")
+println, day_type("Sun")
+println, day_type("???")
+
+# Or-pattern with binding
+fn, first_or_default(lst)
+    match, lst
+        case, [x | _]
+            return, x
+        case, []
+            return, null
+    /end
+/end
+println, first_or_default([42, 100])
+println, first_or_default([])

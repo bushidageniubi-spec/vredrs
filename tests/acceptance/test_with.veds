@@ -1,0 +1,21 @@
+# Acceptance test: with context manager (object form)
+class, CM
+    fn, new()
+        set, self.closed = false
+    /end
+    fn, __enter__()
+        return, "entered"
+    /end
+    fn, __exit__(err)
+        set, self.closed = true
+        return, false
+    /end
+/end
+set, cm = CM()
+set, inside = null
+with, cm, as, v
+    set, inside = v
+/end
+println, inside
+println, cm.closed
+println, "with OK"

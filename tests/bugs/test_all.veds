@@ -1,0 +1,72 @@
+# === Bug 13: Single-quote strings ===
+set, sq = 'hello'
+println, sq
+
+# === Bug 12: Trailing comment ===
+set, x, 10  # this is a comment
+println, x
+
+# === Bug 11: import math PI ===
+import, "math"
+println, math.pi
+
+# === Bug 9: split() ===
+set, parts = split("a,b,c", ",")
+println, parts
+
+# === Bug 10: list_append() ===
+set, lst = [1, 2]
+set, lst = list_append(lst, 3)
+println, lst
+
+# === Bug 6: List comprehension ===
+set, nums = [1, 2, 3, 4, 5]
+set, squares = [x * x for x in nums]
+println, squares
+
+# === Bug 3: __add__ operator overload ===
+class, Vec
+    x
+    y
+    fn, new(a, b)
+        set, self.x = a
+        set, self.y = b
+    /end
+    fn, __add__(other)
+        set, r = Vec(self.x + other.x, self.y + other.y)
+        return, r
+    /end
+    fn, __str__()
+        return, "(" + str(self.x) + ", " + str(self.y) + ")"
+    /end
+/end
+set, v1 = Vec(1, 2)
+set, v2 = Vec(3, 4)
+set, v3 = v1 + v2
+println, v3.__str__()
+
+# === Bug 1: Deep inheritance + super ===
+class, A
+    fn, speak()
+        return, "A"
+    /end
+/end
+class, B, extends, A
+    fn, speak()
+        return, super.speak() + " -> B"
+    /end
+/end
+class, C, extends, B
+    fn, speak()
+        return, super.speak() + " -> C"
+    /end
+/end
+set, c = C()
+println, c.speak()
+
+# === Bug 8: defer order ===
+fn, test_defer()
+    defer, println, "deferred"
+    println, "body"
+/end
+test_defer()

@@ -1,0 +1,67 @@
+# Comprehensive test (no generator) — mirrors user's test_no_generator.veds
+
+# === 1. 深度类继承 + super ===
+class, A
+    fn, speak()
+        return, "A"
+    /end
+/end
+class, B, extends, A
+    fn, speak()
+        return, super.speak() + " -> B"
+    /end
+/end
+class, C, extends, B
+    fn, speak()
+        return, super.speak() + " -> C"
+    /end
+/end
+set, c = C()
+println, "=== 1. 深度类继承 + super ==="
+println, "c.speak() = " + c.speak()
+
+# === 2. 异常链 ===
+fn, deep()
+    throw, "deep error"
+/end
+fn, middle()
+    try
+        deep()
+    catch, e
+        throw, "middle: " + e
+    /end
+/end
+println, "=== 2. 异常链 ==="
+try
+    middle()
+catch, err
+    println, "捕获错误: " + err
+/end
+
+# === 3. 运算符重载 (Vec2) ===
+class, Vec2
+    fn, __init__(x, y)
+        set, self.x = x
+        set, self.y = y
+    /end
+    fn, __add__(other)
+        return, Vec2(self.x + other.x, self.y + other.y)
+    /end
+    fn, __str__()
+        return, "(" + str(self.x) + ", " + str(self.y) + ")"
+    /end
+/end
+set, v1 = Vec2(10, 20)
+set, v2 = Vec2(20, 20)
+set, v3 = v1 + v2
+println, "=== 3. 运算符重载 (Vec2) ==="
+println, "v1 + v2 = " + v3.__str__()
+
+# === 4. with 上下文管理器 ===
+println, "=== 4. with 上下文管理器 ==="
+set, tmpfile = "/tmp/vredrs_with_test.txt"
+set, ok = write_file(tmpfile, "hello world")
+with, open(tmpfile, "w"), f
+    f.write("overwritten")
+/end
+println, "with OK"

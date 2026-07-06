@@ -1,0 +1,8 @@
+# Acceptance test: annotation reflection
+@route("/")
+fn, index()
+    return, "home"
+/end
+set, anns = annotations(index)
+assert, anns["route"] == "/"
+println, "annotations OK"

@@ -1,0 +1,50 @@
+# Vredrs package configuration file.
+# This file defines a Vredrs project's metadata and dependencies.
+# In 2026.7.6 6:52
+
+[package]
+name = "my-vredrs-project"
+version = "0.1.0"
+author = "Alan Chen"
+license = "MTI"
+description = "A Vredrs application"
+
+# Entry point for `vredrs run` and `vredrs build`.
+[entry]
+main = "src/main.veds"
+
+# Library modules exported by this package.
+[lib]
+name = "mylib"
+path = "src/lib.veds"
+exports = ["square", "factorial"]
+
+# Dependencies on other Vredrs packages.
+[dependencies]
+# Example:
+# math_utils = "0.2.0"
+# collections = { path = "../collections" }
+
+# Development-only dependencies.
+[dev-dependencies]
+# test_framework = "0.1.0"
+
+# Build configuration.
+[build]
+# Backend: "native" (default), "llvm-ir", "raw"
+backend = "native"
+# Optimization level: 0 (default for setjmp safety) or 2.
+opt_level = 0
+# Output path (relative to project root).
+output = "build/app"
+
+# Raw firmware configuration (for `vredrs build --raw`).
+[raw]
+# Target triple.
+target = "armv7m-none-eabi"
+# Output format: "bin" or "hex".
+format = "bin"
+# Linker script path (uses default if not specified).
+# linker = "custom.ld"
+# Startup code path (uses default if not specified).
+# startup = "custom_startup.s"

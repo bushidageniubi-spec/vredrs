@@ -1,0 +1,33 @@
+# Feature 4 test: generic type constraints [T: Drawable]
+println, "=== 4. 类型约束（泛型边界）==="
+
+interface, Drawable
+    fn, draw(self)
+/end
+
+class, Circle
+    fn, __init__(r)
+        set, self.r = r
+    /end
+    fn, draw(self)
+        return, "drawing circle r=" + str(self.r)
+    /end
+/end
+
+class, Square
+    fn, __init__(s)
+        set, self.s = s
+    /end
+    fn, draw(self)
+        return, "drawing square s=" + str(self.s)
+    /end
+/end
+
+fn, render[T: Drawable](obj: T)
+    return, obj.draw()
+/end
+
+set, c = Circle(5)
+set, s = Square(4)
+println, render(c)
+println, render(s)

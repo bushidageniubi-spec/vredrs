@@ -1,0 +1,42 @@
+# Feature 1 test: test/bench blocks
+# vredrs test <file> should run these.
+
+fn, add(a, b)
+    return, a + b
+/end
+
+fn, fib(n)
+    if, n <= 1
+        return, n
+    /end
+    return, fib(n-1) + fib(n-2)
+/end
+
+test, "加法"
+    assert, 1 + 1 == 2
+    assert, add(2, 3) == 5
+/end
+
+test, "字符串拼接"
+    assert, "hello" + " " + "world" == "hello world"
+/end
+
+test, "递归 fib"
+    assert, fib(10) == 55
+    assert, fib(15) == 610
+/end
+
+test, "列表操作"
+    set, lst = [1, 2, 3, 4, 5]
+    assert, len(lst) == 5
+    assert, lst[0] == 1
+    assert, lst[4] == 5
+/end
+
+bench, "fib(20)", 100
+    set, _ = fib(20)
+/end
+
+bench, "fib(25)", 10
+    set, _ = fib(25)
+/end

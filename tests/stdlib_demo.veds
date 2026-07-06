@@ -1,0 +1,158 @@
+# Vredrs 0.1.3 标准库综合测试
+println, "=== Vredrs 0.1.3 标准库测试 ==="
+
+# ─── math ─────────────────────────────────────────────
+import, "math"
+println, "--- math ---"
+println, "pi = " + str(math.pi)
+println, "sin(pi/2) = " + str(math.sin(math.pi / 2))
+println, "cos(0) = " + str(math.cos(0))
+println, "sqrt(16) = " + str(math.sqrt(16))
+println, "floor(3.7) = " + str(math.floor(3.7))
+println, "ceil(3.2) = " + str(math.ceil(3.2))
+println, "log(e) = " + str(math.log(math.e))
+println, "pow(2, 10) = " + str(math.pow(2, 10))
+println, "radians(180) = " + str(math.radians(180))
+
+# ─── time ─────────────────────────────────────────────
+import, "time"
+println, "--- time ---"
+set, t = time.now()
+println, "unix = " + str(t.unix())
+println, "year = " + str(t.year())
+println, "month = " + str(t.month())
+println, "day = " + str(t.day())
+println, "format = " + t.format("%Y-%m-%d")
+println, "to_str = " + t.to_str()
+
+# ─── fmt ──────────────────────────────────────────────
+import, "fmt"
+println, "--- fmt ---"
+set, s = fmt.sprintf("name=%s age=%d pi=%.2f", "Alice", 30, 3.14159)
+println, s
+fmt.printf("printf: %d + %d = %d\n", 2, 3, 5)
+
+# ─── path ─────────────────────────────────────────────
+import, "path"
+println, "--- path ---"
+println, path.join("a", "b", "c")
+println, path.dirname("/foo/bar/baz.txt")
+println, path.basename("/foo/bar/baz.txt")
+println, path.ext("/foo/bar/baz.txt")
+println, path.is_abs("/foo")
+
+# ─── encoding ─────────────────────────────────────────
+import, "encoding"
+println, "--- encoding ---"
+set, b64 = encoding.base64.encode("hello")
+println, "base64(hello) = " + b64
+set, dec = encoding.base64.decode(b64)
+println, "decode = " + str(dec)
+println, "hex(hello) = " + encoding.hex.encode("hello")
+println, "url(hello world) = " + encoding.url_encode("hello world")
+
+# ─── crypto ───────────────────────────────────────────
+import, "crypto"
+println, "--- crypto ---"
+println, "sha256(hello) = " + crypto.sha256("hello")
+println, "md5(hello) = " + crypto.md5("hello")
+println, "sha1(hello) = " + crypto.sha1("hello")
+
+# ─── regex ────────────────────────────────────────────
+import, "regex"
+println, "--- regex ---"
+println, regex.match("\\d+", "12345")
+println, regex.match("\\d+", "abc")
+set, m = regex.search("\\d+", "abc123def")
+println, "search = " + str(m)
+println, "find_all = " + str(regex.find_all("\\d+", "a1b2c3"))
+println, "sub = " + regex.sub("\\d+", "#", "a1b2c3")
+
+# ─── rand ─────────────────────────────────────────────
+import, "rand"
+println, "--- rand ---"
+println, "int = " + str(rand.int())
+println, "intn(100) = " + str(rand.intn(100))
+println, "float = " + str(rand.float())
+println, "choice = " + str(rand.choice([1, 2, 3]))
+println, "shuffle = " + str(rand.shuffle([1, 2, 3, 4, 5]))
+println, "string(8) = " + rand.string(8)
+
+# ─── json ─────────────────────────────────────────────
+import, "json"
+println, "--- json ---"
+set, d = {name: "Alice", age: 30}
+set, js = json.stringify(d)
+println, "stringify = " + js
+set, js2 = json.stringify_pretty(d)
+println, "pretty ="
+println, js2
+set, parsed = json.parse("{\"x\": 1, \"y\": 2}")
+println, "parse x = " + str(parsed["x"])
+
+# ─── os ───────────────────────────────────────────────
+import, "os"
+println, "--- os ---"
+println, "cwd = " + str(os.cwd())
+println, "get_env HOME = " + str(os.get_env("HOME"))
+set, st = os.stat(".")
+println, "stat is_dir = " + str(st["is_dir"])
+
+# ─── fs ───────────────────────────────────────────────
+import, "fs"
+println, "--- fs ---"
+println, "temp_dir = " + fs.temp_dir()
+set, tmpf = fs.temp_file("vredrs_test")
+println, "temp_file = " + tmpf
+set, wok = fs.copy(tmpf, tmpf + ".bak")
+println, "copy = " + str(wok)
+
+# ─── debug ────────────────────────────────────────────
+import, "debug"
+println, "--- debug ---"
+set, v = debug.inspect(42)
+println, "inspect returned = " + str(v)
+
+# ─── log ──────────────────────────────────────────────
+import, "log"
+println, "--- log ---"
+log.info("info message")
+log.warn("warn message")
+
+# ─── flag ─────────────────────────────────────────────
+import, "flag"
+println, "--- flag ---"
+println, "args = " + str(flag.args())
+
+# ─── csv ──────────────────────────────────────────────
+import, "csv"
+println, "--- csv ---"
+set, cok = csv.write("/tmp/test.csv", [["name", "age"], ["Alice", "30"], ["Bob", "25"]])
+println, "write = " + str(cok)
+set, rows = csv.read("/tmp/test.csv")
+println, "rows = " + str(rows)
+
+# ─── xml ──────────────────────────────────────────────
+import, "xml"
+println, "--- xml ---"
+set, xd = xml.parse("<greeting>Hello</greeting>")
+println, "tag = " + str(xd["tag"])
+println, "text = " + str(xd["text"])
+
+# ─── toml ─────────────────────────────────────────────
+import, "toml"
+println, "--- toml ---"
+set, td = toml.parse("name = \"Alice\"\nage = 30\n")
+println, "name = " + str(td["name"])
+println, "age = " + str(td["age"])
+
+# ─── sync ─────────────────────────────────────────────
+import, "sync"
+println, "--- sync ---"
+set, m = sync.mutex()
+println, "mutex = " + str(m)
+set, wg = sync.waitgroup()
+println, "waitgroup = " + str(wg)
+
+println, ""
+println, "=== 标准库测试完成 ==="

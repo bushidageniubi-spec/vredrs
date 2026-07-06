@@ -1,0 +1,17 @@
+# Feature 6 test: repeated operator
+println, "=== 6. repeated 运算符 ==="
+
+set, s = "*" repeated 5
+println, s
+
+set, lst = [1, 2] repeated 3
+println, lst
+
+set, hi = "Hi " repeated 3
+println, hi
+
+set, empty = "x" repeated 0
+println, "[" + empty + "]"
+
+set, row = [0] repeated 4
+println, row

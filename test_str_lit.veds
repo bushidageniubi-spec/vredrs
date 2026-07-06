@@ -1,0 +1,10 @@
+set, text = "{\"x\": 42}"
+println, text
+println, len(text)
+set, i = 0
+while, i < len(text)
+    paste, text[i]
+    paste, " "
+    set, i = i + 1
+/end
+paste, "\n"

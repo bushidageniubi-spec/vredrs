@@ -1,0 +1,14 @@
+# Test: lambda closure capturing an enclosing function's parameter.
+# Before the fix, the lambda captured variable names dynamically: when
+# the enclosing function returned, its parameter scope was popped, so
+# the captured variable resolved to null at call time (printing "null").
+# After the fix, the lambda snapshots the visible lexical environment
+# at creation time and restores it when called.
+fn, adder(n)
+    return, fn(x) x + n
+/end
+set, add5, adder(5)
+set, add10, adder(10)
+println, add5(3)
+println, add10(3)
+# Expected output: 8 / 13

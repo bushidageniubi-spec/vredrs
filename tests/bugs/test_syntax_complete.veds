@@ -1,0 +1,313 @@
+# Comprehensive syntax completion test for Vredrs 0.1.2
+# Tests all operator overloads, with statement, pipe, optional chain,
+# pattern matching, in operator, power operator, and more.
+
+# === 1. All arithmetic operator overloads ===
+class, Num
+    val
+    fn, new(v)
+        set, self.val = v
+    /end
+    fn, __add__(o)
+        return, Num(self.val + o.val)
+    /end
+    fn, __sub__(o)
+        return, Num(self.val - o.val)
+    /end
+    fn, __mul__(o)
+        return, Num(self.val * o.val)
+    /end
+    fn, __div__(o)
+        return, Num(self.val / o.val)
+    /end
+    fn, __mod__(o)
+        return, Num(self.val % o.val)
+    /end
+    fn, __neg__()
+        return, Num(0 - self.val)
+    /end
+    fn, __eq__(o)
+        return, self.val == o.val
+    /end
+    fn, __lt__(o)
+        return, self.val < o.val
+    /end
+    fn, __gt__(o)
+        return, self.val > o.val
+    /end
+    fn, __str__()
+        return, "Num(" + str(self.val) + ")"
+    /end
+/end
+set, a = Num(10)
+set, b = Num(3)
+set, c = a + b
+assert, c.val == 13
+set, d = a - b
+assert, d.val == 7
+set, e = a * b
+assert, e.val == 30
+set, f = a / b
+assert, f.val == 3
+set, g = a % b
+assert, g.val == 1
+set, h = -a
+assert, h.val == -10
+assert, a > b
+assert, b < a
+assert, a == Num(10)
+
+# === 2. __getitem__ and __setitem__ ===
+class, Matrix
+    d0
+    d1
+    d2
+    d3
+    fn, new()
+        set, self.d0 = 0
+        set, self.d1 = 0
+        set, self.d2 = 0
+        set, self.d3 = 0
+    /end
+    fn, __getitem__(i)
+        if, i == 0
+            return, self.d0
+        /end
+        if, i == 1
+            return, self.d1
+        /end
+        if, i == 2
+            return, self.d2
+        /end
+        return, self.d3
+    /end
+    fn, __setitem__(i, v)
+        if, i == 0
+            set, self.d0 = v
+        /end
+        if, i == 1
+            set, self.d1 = v
+        /end
+        if, i == 2
+            set, self.d2 = v
+        /end
+    /end
+/end
+set, m = Matrix()
+m[0] = 42
+m[1] = 99
+assert, m[0] == 42
+assert, m[1] == 99
+
+# === 3. __len__ and __str__ ===
+class, Bag
+    items
+    fn, new()
+        set, self.items = [1, 2, 3]
+    /end
+    fn, __len__()
+        set, n = 0
+        for, x, in, self.items
+            set, n = n + 1
+        /end
+        return, n
+    /end
+    fn, __str__()
+        return, "Bag with " + str(self.__len__()) + " items"
+    /end
+/end
+set, bag = Bag()
+assert, bag.__len__() == 3
+set, desc = bag.__str__()
+assert, desc == "Bag with 3 items"
+
+# === 4. __contains__ for `in` operator ===
+class, IntRange
+    lo
+    hi
+    fn, new(a, b)
+        set, self.lo = a
+        set, self.hi = b
+    /end
+    fn, __contains__(x)
+        if, x >= self.lo
+            if, x < self.hi
+                return, true
+            /end
+        /end
+        return, false
+    /end
+/end
+set, r = IntRange(0, 10)
+assert, 5 in r
+set, not_in = 15 in r
+assert, not not_in
+
+# === 5. with statement for custom objects ===
+class, Logger
+    log
+    fn, new()
+        set, self.log = ""
+    /end
+    fn, __enter__()
+        set, self.log = self.log + "enter;"
+        return, self
+    /end
+    fn, __exit__(err)
+        set, self.log = self.log + "exit;"
+        return, false
+    /end
+/end
+set, lg = Logger()
+with, lg, ctx
+    set, lg.log = lg.log + "body;"
+/end
+assert, lg.log == "enter;body;exit;"
+
+# === 6. Pipe operator ===
+fn, double(x)
+    return, x * 2
+/end
+fn, inc(x)
+    return, x + 1
+/end
+set, piped = 5 |> double |> inc
+assert, piped == 11
+
+# === 7. Null coalesce ===
+set, maybe = null
+set, result = maybe ?? "default"
+assert, result == "default"
+set, maybe2 = 42
+set, result2 = maybe2 ?? 0
+assert, result2 == 42
+
+# === 8. Power operator ===
+set, p = 2 ** 10
+assert, p == 1024.0
+
+# === 9. Slice ===
+set, arr = [0, 1, 2, 3, 4, 5]
+set, mid = arr[1:4]
+assert, len(mid) == 3
+assert, mid[0] == 1
+assert, mid[2] == 3
+set, rev = arr[::-1]
+assert, rev[0] == 5
+assert, rev[5] == 0
+set, head = arr[:3]
+assert, len(head) == 3
+set, tail = arr[3:]
+assert, len(tail) == 3
+
+# === 10. String slice ===
+set, s = "hello world"
+set, w = s[:5]
+assert, w == "hello"
+set, w2 = s[6:]
+assert, w2 == "world"
+
+# === 11. String operations ===
+assert, len("hello") == 5
+assert, "hello" + " " + "world" == "hello world"
+set, parts = split("a,b,c", ",")
+assert, len(parts) == 3
+assert, parts[0] == "a"
+set, joined = join([1, 2, 3], "-")
+assert, joined == "1-2-3"
+
+# === 12. Defer ===
+set, order = []
+fn, test_defer()
+    defer, set, order = list_append(order, "c")
+    defer, set, order = list_append(order, "b")
+    set, order = list_append(order, "a")
+/end
+test_defer()
+assert, len(order) == 3
+assert, order[0] == "a"
+assert, order[1] == "b"
+assert, order[2] == "c"
+
+# === 13. Generators with return ===
+fn, gen()
+    yield, 10
+    yield, 20
+    return, "done"
+/end
+set, g = gen()
+assert, resume(g) == 10
+assert, resume(g) == 20
+assert, resume(g) == "done"
+
+# === 14. Try/catch/finally ===
+fn, test_try()
+    try
+        throw, "error"
+    catch, e
+        return, "caught:" + e
+    finally
+        set, dummy = 1
+    /end
+/end
+assert, test_try() == "caught:error"
+
+# === 15. Multiple assignment ===
+set, x, y = 1, 2
+assert, x == 1
+assert, y == 2
+
+# === 16. Ternary ===
+set, t = true ? "yes" : "no"
+assert, t == "yes"
+
+# === 17. for-in over list ===
+set, total = 0
+for, n, in, [1, 2, 3, 4, 5]
+    set, total = total + n
+/end
+assert, total == 15
+
+# === 18. for-in over dict keys ===
+set, d = {a: 1, b: 2}
+set, ks = dict_keys(d)
+set, cnt = 0
+for, k, in, ks
+    set, cnt = cnt + 1
+/end
+assert, cnt == 2
+
+# === 19. Class inheritance with super ===
+class, Animal
+    fn, speak()
+        return, "animal"
+    /end
+/end
+class, Dog, extends, Animal
+    fn, speak()
+        return, super.speak() + ":woof"
+    /end
+/end
+set, dog = Dog()
+assert, dog.speak() == "animal:woof"
+
+# === 20. Deep inheritance ===
+class, Base
+    fn, id()
+        return, "base"
+    /end
+/end
+class, Mid, extends, Base
+    fn, id()
+        return, super.id() + ":mid"
+    /end
+/end
+class, Top, extends, Mid
+    fn, id()
+        return, super.id() + ":top"
+    /end
+/end
+set, top = Top()
+assert, top.id() == "base:mid:top"
+
+println, "ALL SYNTAX TESTS PASSED"

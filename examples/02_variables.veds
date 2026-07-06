@@ -1,0 +1,14 @@
+# Variables and arithmetic
+set, x, 42
+set, y, 3.14
+set, name, "Vredrs"
+paste, "x = "
+paste, x
+paste, ", y = "
+paste, y
+paste, ", name = "
+paste, name
+paste, "\n"
+paste, "x + 10 = "
+paste, x + 10
+paste, "\n"

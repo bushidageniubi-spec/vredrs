@@ -1,0 +1,8 @@
+# Acceptance test: lambda / closure
+set, add = fn(x, y) x + y
+set, result = add(3, 4)
+assert, result == 7
+set, dbl = fn(x) x * 2
+set, d = dbl(5)
+assert, d == 10
+println, "closure OK"

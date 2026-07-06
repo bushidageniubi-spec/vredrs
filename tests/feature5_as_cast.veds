@@ -1,0 +1,26 @@
+# Feature 5 test: as type cast
+println, "=== 5. as 类型转换 ==="
+
+set, x = 1.5 as int
+println, x
+
+set, y = 42 as str
+println, y
+
+set, f = 10 as float
+println, f
+
+set, s = "100" as int
+println, s
+
+set, s2 = "3.14" as float
+println, s2
+
+set, b = 0 as bool
+println, b
+
+set, b2 = 1 as bool
+println, b2
+
+set, n = 123 as str
+println, n

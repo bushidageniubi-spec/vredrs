@@ -1,0 +1,24 @@
+# Test: generator yielding inside a while loop.
+# Before the fix, the eager-evaluation model only collected the first
+# yielded value and then reported the generator as exhausted (printing
+# "1 0 0 0 0 0 0 0"). After the fix, all yielded values are collected.
+fn, fib_gen()
+    set, a, 0
+    set, b, 1
+    while, b < 100
+        yield, b
+        set, tmp, a + b
+        set, a, b
+        set, b, tmp
+    /end
+/end
+set, fg, fib_gen()
+set, j, 0
+while, j < 8
+    set, f, resume(fg)
+    paste, f
+    paste, " "
+    set, j, j + 1
+/end
+paste, "\n"
+# Expected output: 1 1 2 3 5 8 13 21

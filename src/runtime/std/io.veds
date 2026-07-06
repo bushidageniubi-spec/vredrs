@@ -1,0 +1,146 @@
+# Standard I/O library
+#
+# Provides file and stream operations: open/read/write/close, buffered
+# reads, line iteration, and convenience wrappers around the global I/O
+# builtins.
+#
+# The wrappers re-export the global builtins under the `io` module
+# namespace. Inside these wrappers, calls to `open`/`read`/etc. resolve
+# to the global builtins (not to themselves), so there's no recursion.
+
+fn, open(path, mode)
+    return, open(path, mode)
+/end
+
+fn, read(handle, n)
+    return, read(handle, n)
+/end
+
+fn, write(handle, content)
+    return, write(handle, content)
+/end
+
+fn, close(handle)
+    close(handle)
+/end
+
+fn, read_file(path)
+    return, read_file(path)
+/end
+
+fn, write_file(path, content)
+    return, write_file(path, content)
+/end
+
+fn, file_exists(path)
+    return, file_exists(path)
+/end
+
+fn, append_file(path, content)
+    # Read existing content (if any) and re-write the concatenation.
+    if, file_exists(path)
+        set, old, read_file(path)
+        return, write_file(path, old + content)
+    else
+        return, write_file(path, content)
+    /end
+/end
+
+fn, print_line(text)
+    paste, text
+    paste, "\n"
+/end
+
+fn, read_lines(path)
+    # Read the whole file and split on "\n", returning a list of lines
+    # (without trailing newlines). The last element is omitted if the
+    # file ends with a newline (matches Python's `splitlines()` minus
+    # the trailing empty entry for POSIX files).
+    set, content, read_file(path)
+    set, lines, []
+    set, current, ""
+    set, i, 0
+    set, n, len(content)
+    while, i < n
+        set, c, content[i]
+        if, c == "\n"
+            set, lines, lines + [current]
+            set, current, ""
+        else
+            if, c == "\r"
+                set, lines, lines + [current]
+                set, current, ""
+                set, j, i + 1
+                if, j < n
+                    if, content[j] == "\n"
+                        set, i, i + 1
+                    /end
+                /end
+            else
+                set, current, current + c
+            /end
+        /end
+        set, i, i + 1
+    /end
+    if, len(current) > 0
+        set, lines, lines + [current]
+    /end
+    return, lines
+/end
+
+fn, write_lines(path, lines)
+    # Join lines with "\n" and append a trailing newline.
+    set, out, ""
+    set, first, true
+    for, line, in, lines
+        if, first
+            set, out, line
+            set, first, false
+        else
+            set, out, out + "\n" + line
+        /end
+    /end
+    if, len(out) > 0
+        set, out, out + "\n"
+    /end
+    return, write_file(path, out)
+/end
+
+fn, copy_file(src, dst)
+    set, content, read_file(src)
+    return, write_file(dst, content)
+/end
+
+fn, read_all(handle)
+    # Read everything from a handle (n = -1 means "all").
+    return, read(handle, -1)
+/end
+
+fn, read_line(handle)
+    # Read one character at a time until "\n" or EOF.
+    set, line, ""
+    while, true
+        set, c, read(handle, 1)
+        if, len(c) == 0
+            if, len(line) == 0
+                return, null
+            else
+                return, line
+            /end
+        /end
+        if, c == "\n"
+            return, line
+        /end
+        if, c == "\r"
+            set, c2, read(handle, 1)
+            if, c2 != "\n"
+                if, len(c2) > 0
+                    set, line, line + c2
+                /end
+            /end
+            return, line
+        /end
+        set, line, line + c
+    /end
+    return, line
+/end

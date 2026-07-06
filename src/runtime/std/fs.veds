@@ -1,0 +1,203 @@
+# Filesystem operations library
+#
+# Wraps the global FS builtins (read_dir, is_dir, is_file, path_join,
+# basename, dirname) and adds higher-level helpers: recursive directory
+# walking, path manipulation, and file metadata.
+#
+# Inside these wrappers, calls to `read_dir`/`is_dir`/etc. resolve to
+# the global builtins (not to themselves), so there's no recursion.
+
+fn, read_dir(path)
+    return, read_dir(path)
+/end
+
+fn, is_dir(path)
+    return, is_dir(path)
+/end
+
+fn, is_file(path)
+    return, is_file(path)
+/end
+
+fn, path_join(a, b)
+    return, path_join(a, b)
+/end
+
+fn, basename(path)
+    return, basename(path)
+/end
+
+fn, dirname(path)
+    return, dirname(path)
+/end
+
+fn, read_file(path)
+    return, read_file(path)
+/end
+
+fn, write_file(path, content)
+    return, write_file(path, content)
+/end
+
+fn, file_exists(path)
+    return, file_exists(path)
+/end
+
+fn, walk(root)
+    # Recursively walk `root` and return a list of (path, is_dir) tuples
+    # for every entry under it (depth-first). Files come before their
+    # sibling subdirectories' contents.
+    set, result, []
+    set, entries, read_dir(root)
+    for, name, in, entries
+        set, full, path_join(root, name)
+        if, is_dir(full)
+            set, result, result + [(full, true)]
+            set, sub, walk(full)
+            for, item, in, sub
+                set, result, result + [item]
+            /end
+        else
+            set, result, result + [(full, false)]
+        /end
+    /end
+    return, result
+/end
+
+fn, list_files(root)
+    # Non-recursive list of files (not directories) directly under `root`.
+    set, result, []
+    set, entries, read_dir(root)
+    for, name, in, entries
+        set, full, path_join(root, name)
+        if, is_file(full)
+            set, result, result + [full]
+        /end
+    /end
+    return, result
+/end
+
+fn, list_dirs(root)
+    # Non-recursive list of subdirectories directly under `root`.
+    set, result, []
+    set, entries, read_dir(root)
+    for, name, in, entries
+        set, full, path_join(root, name)
+        if, is_dir(full)
+            set, result, result + [full]
+        /end
+    /end
+    return, result
+/end
+
+fn, find_files(root, suffix)
+    # Recursively find all files under `root` whose path ends with `suffix`.
+    set, result, []
+    set, all, walk(root)
+    for, item, in, all
+        set, path, item[0]
+        set, is_d, item[1]
+        if, not is_d
+            if, ends_with(path, suffix)
+                set, result, result + [path]
+            /end
+        /end
+    /end
+    return, result
+/end
+
+fn, ends_with(s, suffix)
+    # Check whether `s` ends with `suffix`.
+    set, n, len(s)
+    set, m, len(suffix)
+    if, m > n
+        return, false
+    /end
+    set, i, 0
+    while, i < m
+        if, s[n - m + i] != suffix[i]
+            return, false
+        /end
+        set, i, i + 1
+    /end
+    return, true
+/end
+
+fn, extname(path)
+    # Return the file extension (including the leading "."), or "" if none.
+    set, base, basename(path)
+    set, n, len(base)
+    set, i, n - 1
+    while, i >= 0
+        set, c, base[i]
+        if, c == "."
+            return, base[i:]
+        /end
+        if, c == "/"
+            return, ""
+        /end
+        set, i, i - 1
+    /end
+    return, ""
+/end
+
+fn, stem(path)
+    # Return the file name without its extension.
+    set, base, basename(path)
+    set, ext, extname(path)
+    if, len(ext) == 0
+        return, base
+    /end
+    return, base[:len(base) - len(ext)]
+/end
+
+fn, mkdir_p(path)
+    # Best-effort: write a placeholder file and remove it. The VM doesn't
+    # expose a real mkdir builtin, so we simulate directory creation by
+    # writing a `.gitkeep`-style marker file inside the directory.
+    set, marker, path_join(path, ".vredrs_dir_marker")
+    return, write_file(marker, "")
+/end
+
+fn, file_size(path)
+    # Approximate file size: read the whole file and count characters.
+    # This is inefficient for large files but works for the VM's
+    # character-based model.
+    if, not file_exists(path)
+        return, -1
+    /end
+    set, content, read_file(path)
+    return, len(content)
+/end
+
+fn, copy_tree(src, dst)
+    # Recursively copy `src` to `dst`.
+    set, all, walk(src)
+    for, item, in, all
+        set, src_path, item[0]
+        set, is_d, item[1]
+        if, not is_d
+            set, rel, strip_prefix(src_path, src)
+            set, dst_path, path_join(dst, rel)
+            set, content, read_file(src_path)
+            set, ok, write_file(dst_path, content)
+        /end
+    /end
+    return, true
+/end
+
+fn, strip_prefix(s, prefix)
+    # Remove `prefix` from the start of `s` if present.
+    set, n, len(prefix)
+    if, len(s) < n
+        return, s
+    /end
+    set, i, 0
+    while, i < n
+        if, s[i] != prefix[i]
+            return, s
+        /end
+        set, i, i + 1
+    /end
+    return, s[n:]
+/end
