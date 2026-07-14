@@ -1,0 +1,10 @@
+# Example: @pipeline + @prefetch.  Compile with:
+#   vredrs build samples/pipeline_demo.cpps -o /tmp/pipe --raw
+# The C* PIR backend emits DMA/compute window asm sideeffect calls and an
+# llvm.prefetch intrinsic at function entry.
+
+@pipeline(priority="high")
+@prefetch(hint="sequential", stride=64)
+fn, process()
+    set, total = 0
+/end

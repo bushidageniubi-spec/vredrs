@@ -1,0 +1,11 @@
+fn, main(): int
+    set, a, 10
+    set, b, 3
+    assert, a + b == 13
+    assert, a - b == 7
+    assert, a * b == 30
+    assert, a // b == 3
+    assert, a % b == 1
+    println, "arithmetic OK"
+    return, 0
+/end

@@ -1,0 +1,11 @@
+fn, make_counter()
+    set, count, 0
+    return, fn() count + 1
+/end
+fn, main(): int
+    set, c, make_counter()
+    set, a, c()
+    assert, a == 1
+    println, "closure counter OK"
+    return, 0
+/end

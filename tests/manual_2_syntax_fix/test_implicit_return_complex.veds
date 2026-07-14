@@ -1,0 +1,16 @@
+# Test implicit return with various expressions
+fn, add_one(x)
+    x + 1
+/end
+println, add_one(5))
+fn, make_pair(a, b)
+    [a, b]
+/end
+println, make_pair(3, 7))
+fn, with_if(x)
+    if, x > 0
+        return, "positive"
+    /end
+/end
+println, with_if(5))
+println, with_if(-5))

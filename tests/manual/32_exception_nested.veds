@@ -1,0 +1,14 @@
+fn, main(): int
+    try
+        try
+            throw, "inner"
+        catch, e
+            assert, e == "inner"
+            throw, "outer"
+        /end
+    catch, e2
+        assert, e2 == "outer"
+    /end
+    println, "nested exceptions OK"
+    return, 0
+/end

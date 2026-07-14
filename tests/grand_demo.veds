@@ -1,0 +1,229 @@
+# Vredrs 0.1.2 — 大型综合演示程序
+# 集成全部 10 个新语法特性，模拟一个"图形渲染引擎"的迷你 DSL。
+# 运行：vredrs run tests/grand_demo.veds
+
+println, "========================================"
+println, "  Vredrs 0.1.2 综合演示"
+println, "========================================"
+
+# ─── 特性 3: 枚举（穷尽性检查）─────────────────────────
+enum, Shape
+    Circle
+    Square
+    Triangle
+/end
+
+# ─── 特性 9: interface 运行时检查 ─────────────────────────
+interface, Drawable
+    fn, draw(self)
+/end
+
+interface, Area
+    fn, area(self)
+/end
+
+# ─── 特性 4: 类型约束 + 特性 9: implements ──────────────────
+fn, describe[T: Drawable](obj: T)
+    return, obj.draw()
+/end
+
+# ─── 特性 10: 宏定义 ────────────────────────────────────
+macro, require(cond, msg)
+    if, not cond
+        throw, msg
+    /end
+/end
+
+macro, trace(label, val)
+    println, "[trace] " + label + " = " + str(val)
+/end
+
+# ─── 特性 8: extern FFI ─────────────────────────────────
+extern fn, printf(fmt: str, ...): int
+extern fn, abs(n: int): int
+
+# ─── 类定义（特性 3 枚举 + 特性 9 接口 + 运算符重载）─────
+class, Circle, implements, Drawable, implements, Area
+    fn, __init__(r)
+        set, self.r = r
+    /end
+    fn, draw(self)
+        return, "○ Circle(r=" + str(self.r) + ")"
+    /end
+    fn, area(self)
+        return, 3.14159 * self.r * self.r
+    /end
+    fn, __add__(other)
+        return, Circle(self.r + other.r)
+    /end
+    fn, __str__()
+        return, "Circle(" + str(self.r) + ")"
+    /end
+/end
+
+class, Square, implements, Drawable, implements, Area
+    fn, __init__(s)
+        set, self.s = s
+    /end
+    fn, draw(self)
+        return, "□ Square(s=" + str(self.s) + ")"
+    /end
+    fn, area(self)
+        return, self.s * self.s
+    /end
+    fn, __str__()
+        return, "Square(" + str(self.s) + ")"
+    /end
+/end
+
+class, Triangle, implements, Drawable, implements, Area
+    fn, __init__(b, h)
+        set, self.b = b
+        set, self.h = h
+    /end
+    fn, draw(self)
+        return, "△ Triangle(b=" + str(self.b) + ", h=" + str(self.h) + ")"
+    /end
+    fn, area(self)
+        return, 0.5 * self.b * self.h
+    /end
+    fn, __str__()
+        return, "Triangle(" + str(self.b) + "," + str(self.h) + ")"
+    /end
+/end
+
+# ─── 特性 2: 模式匹配 |（或模式）+ 特性 3: 枚举 ──────────
+fn, shape_kind(s)
+    match, s
+        case, Shape.Circle
+            return, "圆形"
+        case, Shape.Square
+            return, "方形"
+        case, Shape.Triangle
+            return, "三角形"
+    /end
+/end
+
+fn, classify_size(area)
+    match, area
+        case, 0 | 1 | 2 | 3 | 4
+            return, "tiny"
+        case, 5 | 6 | 7 | 8 | 9 | 10
+            return, "small"
+        case, _
+            return, "large"
+    /end
+/end
+
+# ─── 特性 5: as 类型转换 + 特性 6: repeated ──────────────
+fn, banner(text, width)
+    set, pad = "*" repeated width
+    return, pad + " " + text + " " + pad
+/end
+
+# ─── 特性 7: range step ─────────────────────────────────
+fn, sum_evens(start, end)
+    set, total = 0
+    for, i, in, start..end step 2
+        set, total = total + i
+    /end
+    return, total
+/end
+
+# ─── 特性 1: test 块 ────────────────────────────────────
+test, "Circle area"
+    set, c = Circle(3)
+    set, a = c.area()
+    require(a > 28.0, "circle area should be > 28")
+    require(a < 30.0, "circle area should be < 30")
+/end
+
+test, "Square area"
+    set, s = Square(4)
+    require(s.area() == 16, "square 4x4 = 16")
+/end
+
+test, "Operator overload"
+    set, c1 = Circle(2)
+    set, c2 = Circle(3)
+    set, c3 = c1 + c2
+    require(c3.r == 5, "Circle(2) + Circle(3) = Circle(5)")
+/end
+
+test, "Enum match"
+    require(shape_kind(Shape.Circle) == "圆形", "Circle → 圆形")
+    require(shape_kind(Shape.Triangle) == "三角形", "Triangle → 三角形")
+/end
+
+test, "Or-pattern classify"
+    require(classify_size(2) == "tiny", "2 → tiny")
+    require(classify_size(8) == "small", "8 → small")
+    require(classify_size(100) == "large", "100 → large")
+/end
+
+test, "as cast"
+    require((3.7 as int) == 3, "3.7 as int = 3")
+    require((42 as str) == "42", "42 as str = \"42\"")
+/end
+
+test, "repeated operator"
+    require(("#" repeated 5) == "#####", "# repeated 5 = #####")
+    require(len([0] repeated 3) == 3, "[0] repeated 3 has len 3")
+/end
+
+test, "range step"
+    require(sum_evens(0, 10) == 20, "0+2+4+6+8 = 20")
+/end
+
+test, "macro expansion"
+    set, x = 10
+    require(x > 5, "x > 5")
+    trace("x", x)
+/end
+
+bench, "Circle(100).area()", 10
+    set, _ = Circle(100).area()
+/end
+
+# ─── 主程序 ─────────────────────────────────────────────
+println, ""
+println, "--- 图形渲染 ---"
+set, shapes = [Circle(5), Square(4), Triangle(3, 6)]
+for, s, in, shapes
+    printf("%s | area = %.2f\n", s.draw(), s.area())
+/end
+
+println, ""
+println, "--- 枚举匹配 ---"
+for, sh, in, [Shape.Circle, Shape.Square, Shape.Triangle]
+    println, shape_kind(sh)
+/end
+
+println, ""
+println, "--- 类型约束 + 接口 ---"
+set, c = Circle(10)
+println, describe(c)
+
+println, ""
+println, "--- 类型转换 + 重复 ---"
+println, banner("HELLO", 3)
+println, "int(3.9) = " + str(3.9 as int)
+println, "str(100) = " + str(100 as str)
+println, "bool(0) = " + str(0 as bool)
+
+println, ""
+println, "--- range step ---"
+set, total = sum_evens(0, 20)
+println, "sum of evens 0..20 = " + str(total)
+
+println, ""
+println, "--- FFI ---"
+printf("abs(-42) = %d\n", abs(-42))
+printf("hello %s, count = %d\n", "world", 3)
+
+println, ""
+println, "--- 宏 ---"
+trace("demo complete", 1)
+println, "========================================"
+println, "  演示完成 — 运行 vredrs test 查看测试结果"
+println, "========================================"

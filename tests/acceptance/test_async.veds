@@ -1,0 +1,8 @@
+# Acceptance test: async / await
+async fn, fetch()
+    return, 42
+/end
+set, task = fetch()
+set, val = await task
+assert, val == 42
+println, "async OK"

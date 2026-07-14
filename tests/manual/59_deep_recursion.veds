@@ -1,0 +1,11 @@
+fn, sum_to(n): int
+    if, n == 0
+        return, 0
+    /end
+    return, n + sum_to(n - 1)
+/end
+fn, main(): int
+    assert, sum_to(100) == 5050
+    println, "deep recursion OK"
+    return, 0
+/end

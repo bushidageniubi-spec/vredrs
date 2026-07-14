@@ -1,0 +1,62 @@
+# Acceptance test: string, list, and dict stdlib methods.
+
+# String methods
+set, s, "Hello, World!"
+assert, s.replace("World", "Vredrs") == "Hello, Vredrs!"
+assert, s.contains("World") == true
+assert, s.contains("xyz") == false
+assert, s.startswith("Hello") == true
+assert, s.ends_with("!") == true
+assert, s.find("World") == 7
+assert, s.find("xyz") == -1
+assert, s.substr(0, 5) == "Hello"
+assert, s.trim() == "Hello, World!"
+assert, s.repeat(2) == "Hello, World!Hello, World!"
+assert, s.upper() == "HELLO, WORLD!"
+assert, s.lower() == "hello, world!"
+assert, "  spaced  ".trim() == "spaced"
+assert, s.reverse() == "!dlroW ,olleH"
+assert, s.is_empty() == false
+assert, "".is_empty() == true
+
+# List methods
+set, lst, [3, 1, 4, 1, 5, 9, 2, 6]
+assert, lst.len() == 8
+assert, lst.sort() == [1, 1, 2, 3, 4, 5, 6, 9]
+assert, lst.contains(5) == true
+assert, lst.index(4) == 2
+assert, lst.first() == 3
+assert, lst.last() == 6
+assert, lst.min() == 1
+assert, lst.max() == 9
+assert, lst.sum() == 31
+assert, lst.unique() == [3, 1, 4, 5, 9, 2, 6]
+assert, lst.slice(0, 3) == [3, 1, 4]
+assert, lst.concat([7, 8]) == [3, 1, 4, 1, 5, 9, 2, 6, 7, 8]
+assert, lst.map(fn(x) x * 2) == [6, 2, 8, 2, 10, 18, 4, 12]
+assert, lst.filter(fn(x) x > 3) == [4, 5, 9, 6]
+assert, lst.reduce(fn(a, b) a + b, 0) == 31
+assert, lst.is_empty() == false
+assert, [].is_empty() == true
+
+# Dict methods
+set, d, {"a": 1, "b": 2, "c": 3}
+assert, d.len() == 3
+assert, d.has("a") == true
+assert, d.has("z") == false
+assert, d.get("a") == 1
+assert, d.get("z") == null
+assert, d.keys().len() == 3
+assert, d.values().sum() == 6
+assert, d.items().len() == 3
+assert, d.is_empty() == false
+set, d2, d.set("d", 4)
+assert, d2.has("d") == true
+assert, d2.get("d") == 4
+set, d3, d.delete("a")
+assert, d3.has("a") == false
+set, d4, {"x": 1}.merge({"y": 2})
+assert, d4.has("x") == true
+assert, d4.has("y") == true
+
+println, "stdlib methods OK"

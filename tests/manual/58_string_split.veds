@@ -1,0 +1,6 @@
+fn, main(): int
+    set, parts, split("a,b,c", ",")
+    assert, parts# == 3
+    println, "string split OK"
+    return, 0
+/end

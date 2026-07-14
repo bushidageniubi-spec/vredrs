@@ -1,0 +1,13 @@
+fn, main(): int
+    set, items, [{"x": 1}, {"x": 2}, {"x": 3}]
+    set, sum, 0
+    set, i, 0
+    while, i < 3
+        set, item, items[i]
+        set, sum, sum + item["x"]
+        set, i, i + 1
+    /end
+    assert, sum == 6
+    println, "list of dicts OK"
+    return, 0
+/end

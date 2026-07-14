@@ -1,0 +1,214 @@
+# Comprehensive integration test for Vredrs 0.1.2
+# Tests all language features to verify bug fixes and find new issues.
+
+# === 1. Single-quote strings (bug 13) ===
+set, s1 = 'single quote'
+set, s2 = "double quote"
+println, s1
+println, s2
+assert, s1 == 'single quote'
+assert, s2 == "double quote"
+
+# === 2. Trailing comments (bug 12) ===
+set, x = 42  # this is a comment
+assert, x == 42
+set, y, 99  # another comment
+assert, y == 99
+
+# === 3. Math module (bug 11) ===
+import, "math"
+assert, math.pi > 3.14
+assert, math.e > 2.71
+set, r = math.sqrt(16)
+assert, r == 4.0
+
+# === 4. split() (bug 9) ===
+set, parts = split("a,b,c,d", ",")
+assert, len(parts) == 4
+assert, parts[0] == "a"
+assert, parts[3] == "d"
+
+# === 5. list_append() (bug 10) ===
+set, lst = [1, 2]
+set, lst = list_append(lst, 3)
+assert, len(lst) == 3
+assert, lst[2] == 3
+
+# === 6. List comprehension (bug 6) ===
+set, nums = [1, 2, 3, 4, 5]
+set, squares = [x * x for x in nums]
+assert, len(squares) == 5
+assert, squares[0] == 1
+assert, squares[4] == 25
+
+# === 7. __add__ operator overload (bug 3) ===
+class, Vec
+    x
+    y
+    fn, new(a, b)
+        set, self.x = a
+        set, self.y = b
+    /end
+    fn, __add__(other)
+        return, Vec(self.x + other.x, self.y + other.y)
+    /end
+    fn, __str__()
+        return, "(" + str(self.x) + ", " + str(self.y) + ")"
+    /end
+/end
+set, v1 = Vec(1, 2)
+set, v2 = Vec(3, 4)
+set, v3 = v1 + v2
+assert, v3.x == 4
+assert, v3.y == 6
+
+# === 8. Deep inheritance + super (bug 1) ===
+class, A
+    fn, speak()
+        return, "A"
+    /end
+/end
+class, B, extends, A
+    fn, speak()
+        return, super.speak() + " -> B"
+    /end
+/end
+class, C, extends, B
+    fn, speak()
+        return, super.speak() + " -> C"
+    /end
+/end
+set, c = C()
+set, result = c.speak()
+assert, result == "A -> B -> C"
+
+# === 9. defer order (bug 8) ===
+set, log = []
+fn, test_defer()
+    defer, set, log = list_append(log, "deferred")
+    set, log = list_append(log, "body")
+/end
+test_defer()
+assert, len(log) == 2
+assert, log[0] == "body"
+assert, log[1] == "deferred"
+
+# === 10. with statement (bug 4) ===
+set, tmpfile = "/tmp/vredrs_with_test.txt"
+set, ok = write_file(tmpfile, "hello")
+assert, ok
+with, open(tmpfile, "r"), f
+    set, content = read(f, -1)
+    assert, content == "hello"
+/end
+
+# === 11. String interpolation ===
+set, name = "World"
+set, msg = "Hello, {name}!"
+assert, msg == "Hello, World!"
+set, n = 42
+set, s = "x = {n}"
+assert, s == "x = 42"
+
+# === 12. Generators ===
+fn, counter()
+    yield, 1
+    yield, 2
+    yield, 3
+    return, "done"
+/end
+set, g = counter()
+set, v1 = resume(g)
+set, v2 = resume(g)
+set, v3 = resume(g)
+set, v4 = resume(g)
+assert, v1 == 1
+assert, v2 == 2
+assert, v3 == 3
+assert, v4 == "done"
+
+# === 13. Try/catch ===
+fn, test_try()
+    try
+        throw, "oops"
+    catch, e
+        return, "caught: " + e
+    /end
+    return, "no throw"
+/end
+set, tr = test_try()
+assert, tr == "caught: oops"
+
+# === 14. Multiple assignment ===
+set, a, b = 1, 2
+assert, a == 1
+assert, b == 2
+
+# === 15. Ternary ===
+set, cond = true
+set, val = cond ? "yes" : "no"
+assert, val == "yes"
+
+# === 16. Null coalesce ===
+set, maybe = null
+set, result2 = maybe ?? "default"
+assert, result2 == "default"
+
+# === 17. Slices ===
+set, arr = [0, 1, 2, 3, 4]
+set, mid = arr[1:4]
+assert, len(mid) == 3
+assert, mid[0] == 1
+set, rev = arr[::-1]
+assert, rev[0] == 4
+
+# === 18. os module ===
+import, "os"
+set, cwd = os.cwd()
+assert, len(cwd) > 0
+set, er = os.exec("echo", "test")
+assert, er["exit_code"] == 0
+assert, er["stdout"] == "test\n"
+
+# === 19. JSON ===
+import, "json"
+set, d = {name: "Alice", age: 30}
+set, js = json.stringify(d)
+assert, len(js) > 0
+set, parsed = json.parse(js)
+assert, parsed["name"] == "Alice"
+assert, parsed["age"] == 30
+
+# === 20. while loop with break/continue ===
+set, total = 0
+set, i = 0
+while, i < 10
+    set, i = i + 1
+    if, i == 5
+        continue
+    /end
+    if, i == 8
+        break
+    /end
+    set, total = total + i
+/end
+# 1+2+3+4+6+7 = 23
+assert, total == 23
+
+# === 21. for-in over list ===
+set, sum = 0
+for, x, in, [10, 20, 30]
+    set, sum = sum + x
+/end
+assert, sum == 60
+
+# === 22. for-in over dict keys ===
+set, d2 = {a: 1, b: 2, c: 3}
+set, count = 0
+set, ks = dict_keys(d2)
+for, k, in, ks
+    set, count = count + 1
+/end
+assert, count == 3
+
+println, "ALL TESTS PASSED"

@@ -1,0 +1,11 @@
+fn, inner(): int
+    return, 42
+/end
+fn, outer(): int
+    return, inner()
+/end
+fn, main(): int
+    assert, outer() == 42
+    println, "nested fn OK"
+    return, 0
+/end

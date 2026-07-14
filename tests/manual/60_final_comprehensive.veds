@@ -1,0 +1,27 @@
+fn, fib(n): int
+    if, n < 2
+        return, n
+    /end
+    return, fib(n-1) + fib(n-2)
+/end
+class, Counter
+    fn, new()
+        set, self.count, 0
+        return, self
+    /end
+    fn, inc()
+        set, self.count, self.count + 1
+        return, self.count
+    /end
+/end
+fn, main(): int
+    assert, fib(10) == 55
+    set, c, Counter.new()
+    assert, c.inc() == 1
+    assert, c.inc() == 2
+    assert, c.inc() == 3
+    set, xs, [x * x for x in [1, 2, 3, 4, 5]]
+    assert, sum(xs) == 55
+    println, "comprehensive OK"
+    return, 0
+/end

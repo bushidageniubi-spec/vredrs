@@ -1,0 +1,11 @@
+fn, fib(n): int
+    if, n < 2
+        return, n
+    /end
+    return, fib(n-1) + fib(n-2)
+/end
+fn, main(): int
+    assert, fib(10) == 55
+    println, "recursion OK"
+    return, 0
+/end

@@ -1,0 +1,12 @@
+# Test Bug 9: test/bench blocks (should be silently skipped in `vredrs run`)
+fn, add(a, b)
+    return, a + b
+/end
+test, "basic add"
+    assert, add(1, 2) == 3
+/end
+bench, "add benchmark", 10
+    set, _ = add(1, 2)
+/end
+println, "after test/bench"
+println, add(10, 20)

@@ -1,0 +1,12 @@
+# Test Bug 1: loop ... /end with break
+set, i = 0
+set, sum = 0
+loop
+    if, i >= 5
+        break
+    /end
+    set, sum = sum + i
+    set, i = i + 1
+/end
+println, sum
+println, i

@@ -1,0 +1,7 @@
+fn, main(): int
+    set, s, "hello"
+    assert, s# == 5
+    assert, s == "hello"
+    println, "string indexing OK"
+    return, 0
+/end

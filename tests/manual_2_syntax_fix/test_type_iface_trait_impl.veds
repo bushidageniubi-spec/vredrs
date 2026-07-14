@@ -1,0 +1,16 @@
+# Test Bug 5-7: type / interface / trait / impl / dtor (should not error, no runtime effect)
+type, MyInt = int
+interface, Drawable
+    fn, draw(self)
+/end
+trait, Greetable
+    fn, greet(self)
+/end
+impl, Greetable for MyInt
+    fn, greet(self)
+        println, "hello from int"
+    /end
+/end
+# dtor is parsed in .vraw/.cpps context; in .veds it might error.
+# Skip dtor here.
+println, "type/interface/trait/impl parsed OK"

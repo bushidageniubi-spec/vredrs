@@ -1,0 +1,13 @@
+fn, main(): int
+    set, xs, []
+    set, i, 0
+    while, i < 100
+        set, xs, list_append(xs, i)
+        set, i, i + 1
+    /end
+    assert, xs# == 100
+    set, s, sum(xs)
+    assert, s == 4950
+    println, "large list OK"
+    return, 0
+/end

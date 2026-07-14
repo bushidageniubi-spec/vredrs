@@ -1,0 +1,20 @@
+class, Base
+    fn, new()
+        return, self
+    /end
+    fn, name()
+        return, "Base"
+    /end
+/end
+class, Derived, extends, Base
+    fn, name()
+        return, super.name() + "Derived"
+    /end
+/end
+fn, main(): int
+    set, d, Derived.new()
+    set, n, d.name()
+    assert, n == "BaseDerived"
+    println, "super chain OK"
+    return, 0
+/end

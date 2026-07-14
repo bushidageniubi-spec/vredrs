@@ -1,0 +1,5 @@
+# Module system (requires lib/math_lib.veds)
+import, "lib/math_lib.veds", factorial
+paste, "7! = "
+paste, factorial(7)
+paste, "\n"

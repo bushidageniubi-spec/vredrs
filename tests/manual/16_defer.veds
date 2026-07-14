@@ -1,0 +1,8 @@
+fn, cleanup()
+    println, "defer OK"
+/end
+fn, main(): int
+    defer, cleanup()
+    println, "body"
+    return, 0
+/end

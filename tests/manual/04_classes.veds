@@ -1,0 +1,16 @@
+class, Animal
+    fn, new(name)
+        set, self.name, name
+        return, self
+    /end
+    fn, speak()
+        return, self.name + " speaks"
+    /end
+/end
+fn, main(): int
+    set, a, Animal.new("Cat")
+    set, s, a.speak()
+    assert, s == "Cat speaks"
+    println, "classes OK"
+    return, 0
+/end

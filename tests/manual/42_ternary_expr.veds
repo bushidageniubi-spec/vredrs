@@ -1,0 +1,10 @@
+fn, main(): int
+    set, n, 5
+    set, label, n > 3 ? "big" : "small"
+    assert, label == "big"
+    set, n2, 1
+    set, label2, n2 > 3 ? "big" : "small"
+    assert, label2 == "small"
+    println, "ternary expr OK"
+    return, 0
+/end

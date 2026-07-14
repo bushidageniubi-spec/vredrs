@@ -1,0 +1,5 @@
+# Test constexpr with complex expression
+constexpr, TWO = 1 + 1
+constexpr, MSG = "answer is " + "42"
+println, TWO
+println, MSG

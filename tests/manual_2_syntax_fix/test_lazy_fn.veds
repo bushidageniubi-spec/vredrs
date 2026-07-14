@@ -1,0 +1,5 @@
+# Test lazy fn (treated as regular fn)
+lazy fn, compute(x, y)
+    return, x * y + x + y
+/end
+println, compute(3, 4))

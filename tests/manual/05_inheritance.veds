@@ -1,0 +1,21 @@
+class, Animal
+    fn, new(name)
+        set, self.name, name
+        return, self
+    /end
+    fn, speak()
+        return, self.name + " makes a sound"
+    /end
+/end
+class, Dog, extends, Animal
+    fn, speak()
+        return, super.speak() + " (bark)"
+    /end
+/end
+fn, main(): int
+    set, d, Dog.new("Rex")
+    set, s, d.speak()
+    assert, s == "Rex makes a sound (bark)"
+    println, "inheritance OK"
+    return, 0
+/end

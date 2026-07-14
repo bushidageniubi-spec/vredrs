@@ -1,0 +1,13 @@
+# Lists, dicts, comprehensions
+set, nums, [1, 2, 3, 4, 5]
+set, squares, [x * x for x in nums]
+paste, "squares: "
+for, s, in, squares
+    paste, s
+    paste, " "
+/end
+paste, "\n"
+set, d, {"pi": 314, "e": 271}
+paste, "d[pi] = "
+paste, d["pi"]
+paste, "\n"

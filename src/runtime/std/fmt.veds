@@ -1,0 +1,125 @@
+# Formatting library
+#
+# Provides printf/sprintf style output. `sprintf(fmt, args)` substitutes
+# `{}` placeholders in `fmt` with str(arg) from `args` in order, with
+# support for indexed (`{0}`, `{1}`) and named (`{name}`) placeholders.
+# `printf(fmt, args)` prints the formatted string with a trailing newline.
+# `fprintf(handle, text)` writes text to an open file handle.
+
+fn, sprintf(fmt_str, args)
+    return, _sprintf_with_map(fmt_str, args, dict())
+/end
+
+fn, _sprintf_with_map(fmt_str, args, named)
+    set, result, ""
+    set, arg_idx, 0
+    set, i, 0
+    set, n, len(fmt_str)
+    while, i < n
+        set, c, fmt_str[i]
+        if, c == "{"
+            set, j, i + 1
+            if, j < n
+                if, fmt_str[j] == "{"
+                    set, result, result + "{"
+                    set, i, i + 2
+                else
+                    # Find matching "}"
+                    set, k, j
+                    set, found, false
+                    while, k < n
+                        if, fmt_str[k] == "}"
+                            set, found, true
+                            break
+                        /end
+                        set, k, k + 1
+                    /end
+                    if, not found
+                        set, result, result + c
+                        set, i, i + 1
+                    else
+                        set, spec, fmt_str[j:k]
+                        set, val, _resolve_spec(spec, args, arg_idx, named)
+                        set, result, result + str(val)
+                        # Increment arg_idx only if spec was "{}" (positional auto)
+                        if, len(spec) == 0
+                            set, arg_idx, arg_idx + 1
+                        /end
+                        set, i, k + 1
+                    /end
+                /end
+            else
+                set, result, result + "{"
+                set, i, i + 1
+            /end
+        else
+            if, c == "}"
+                set, j, i + 1
+                if, j < n
+                    if, fmt_str[j] == "}"
+                        set, result, result + "}"
+                        set, i, i + 2
+                    else
+                        set, result, result + "}"
+                        set, i, i + 1
+                    /end
+                else
+                    set, result, result + "}"
+                    set, i, i + 1
+                /end
+            else
+                set, result, result + c
+                set, i, i + 1
+            /end
+        /end
+    /end
+    return, result
+/end
+
+fn, _resolve_spec(spec, args, arg_idx, named)
+    # "{}" → args[arg_idx]
+    # "{0}", "{1}" → args[int(spec)]
+    # "{name}" → named[name] if present, else args[int(spec)] if numeric
+    if, len(spec) == 0
+        if, arg_idx < len(args)
+            return, args[arg_idx]
+        /end
+        return, ""
+    /end
+    # Check if spec is a number (indexed access).
+    set, first, spec[0]
+    if, first >= "0"
+        if, first <= "9"
+            set, idx, int(spec)
+            if, idx < len(args)
+                return, args[idx]
+            /end
+            return, ""
+        /end
+    /end
+    # Named access.
+    if, dict_has(named, spec)
+        return, dict_get(named, spec)
+    /end
+    return, ""
+/end
+
+fn, printf(fmt_str, args)
+    set, s, sprintf(fmt_str, args)
+    paste, s
+    paste, "\n"
+/end
+
+fn, fprintf(handle, text)
+    return, write(handle, text)
+/end
+
+fn, format(fmt_str, args)
+    # Alias for sprintf (matches Python's str.format convention).
+    return, sprintf(fmt_str, args)
+/end
+
+fn, template(fmt_str, named)
+    # Format with a named-args map: template("Hello, {name}!", {name: "Alice"})
+    return, _sprintf_with_map(fmt_str, [], named)
+/end

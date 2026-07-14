@@ -1,0 +1,8 @@
+# Test Bug 2: spread in list literal
+set, a = [1, 2, 3]
+set, b = [...a, 4]
+println, b
+set, c = [0, ...a, 4, ...a]
+println, c
+set, d = [...a]
+println, d

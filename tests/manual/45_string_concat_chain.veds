@@ -1,0 +1,7 @@
+fn, main(): int
+    set, s, "a" + "b" + "c" + "d"
+    assert, s == "abcd"
+    assert, s# == 4
+    println, "string concat chain OK"
+    return, 0
+/end

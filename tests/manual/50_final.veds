@@ -1,0 +1,11 @@
+fn, main(): int
+    set, xs, [1, 2, 3, 4, 5]
+    set, squares, [x * x for x in xs]
+    assert, squares# == 5
+    set, evens, [x for x in xs if x % 2 == 0]
+    assert, evens# == 2
+    set, s, sum(xs)
+    assert, s == 15
+    println, "all features OK"
+    return, 0
+/end

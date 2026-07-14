@@ -1,0 +1,15 @@
+fn, main(): int
+    set, d, {"a": 1, "b": 2, "c": 3}
+    set, keys, ["a", "b", "c"]
+    set, i, 0
+    set, sum, 0
+    while, i < 3
+        set, k, keys[i]
+        set, v, d[k]
+        set, sum, sum + v
+        set, i, i + 1
+    /end
+    assert, sum == 6
+    println, "dict var index OK"
+    return, 0
+/end

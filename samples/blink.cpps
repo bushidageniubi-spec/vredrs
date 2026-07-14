@@ -1,0 +1,25 @@
+# Cstar bare-metal blink example for ARM Cortex-M3.
+
+fn, main()
+    set, rcgc2, 0x400FE108
+    set, i, 0
+    while, i < 1000
+        set, i, i + 1
+    /end
+    set, dir, 0x40025400
+    set, den, 0x4002551C
+    set, data, 0x400253FC
+    set, on, 0
+    loop
+        if, on != 0
+            set, on, 0
+        else
+            set, on, 1
+        /end
+        set, d, 0
+        while, d < 200000
+            set, d, d + 1
+        /end
+    /end
+    return, 0
+/end

@@ -1,0 +1,22 @@
+# Control flow: if/elif/else, while, for, break, continue
+set, x, 5
+if, x > 10
+    paste, "big\n"
+elif, x > 3
+    paste, "medium\n"
+else
+    paste, "small\n"
+/end
+set, sum, 0
+for, i, in, range(0, 10)
+    if, i % 2 == 0
+        continue
+    /end
+    if, i >= 7
+        break
+    /end
+    set, sum, sum + i
+/end
+paste, "sum of odd < 7 = "
+paste, sum
+paste, "\n"

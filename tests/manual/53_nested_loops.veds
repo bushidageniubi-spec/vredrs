@@ -1,0 +1,15 @@
+fn, main(): int
+    set, total, 0
+    set, i, 0
+    while, i < 3
+        set, j, 0
+        while, j < 3
+            set, total, total + i * j
+            set, j, j + 1
+        /end
+        set, i, i + 1
+    /end
+    assert, total == 9
+    println, "nested loops OK"
+    return, 0
+/end

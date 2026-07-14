@@ -1,0 +1,1312 @@
+# Core standard library — pure Vredrs implementation.
+# These functions replace the VM's hardcoded call_builtin_value entries.
+# No Rust FFI: everything is implemented in pure Vredrs.
+
+# ── Type conversions ──────────────────────────────────────
+
+fn, core_len(v)
+    # Dispatch by trying methods, fallback to 0.
+    if, v == null
+        return, 0
+    /end
+    return, v#
+/end
+
+fn, core_str(v)
+    # String conversion: use the value's __str__ if available,
+    # otherwise use the built-in str() as a fallback.
+    return, str(v)
+/end
+
+fn, core_int(v)
+    return, int(v)
+/end
+
+fn, core_float(v)
+    return, float(v)
+/end
+
+fn, core_bool(v)
+    if, v
+        return, true
+    /end
+    return, false
+/end
+
+fn, core_type_of(v)
+    return, type_of(v)
+/end
+
+# ── Math helpers ──────────────────────────────────────────
+
+fn, core_abs(x)
+    if, x < 0
+        return, 0 - x
+    /end
+    return, x
+/end
+
+fn, core_floor(x)
+    set, i, int(x)
+    if, x < i
+        return, i - 1
+    /end
+    return, i
+/end
+
+fn, core_ceil(x)
+    set, i, int(x)
+    if, x > i
+        return, i + 1
+    /end
+    return, i
+/end
+
+fn, core_round(x)
+    set, i, int(x)
+    if, x - i >= 0.5
+        return, i + 1
+    /end
+    if, x - i <= -0.5
+        return, i - 1
+    /end
+    return, i
+/end
+
+fn, core_min(a, b)
+    if, a < b
+        return, a
+    /end
+    return, b
+/end
+
+fn, core_max(a, b)
+    if, a > b
+        return, a
+    /end
+    return, b
+/end
+
+fn, core_sum(xs)
+    set, total, 0
+    for, x, in, xs
+        set, total, total + x
+    /end
+    return, total
+/end
+
+fn, core_pow(base, exp)
+    set, result, 1
+    set, i, 0
+    while, i < exp
+        set, result, result * base
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+# ── Character operations ──────────────────────────────────
+
+fn, core_chr(n)
+    # Convert integer to single-character string.
+    # Uses a lookup for ASCII printable range.
+    if, n == 32
+        return, " "
+    /end
+    if, n == 33
+        return, "!"
+    /end
+    if, n == 34
+        return, "\""
+    /end
+    if, n == 35
+        return, "#"
+    /end
+    if, n == 36
+        return, "$"
+    /end
+    if, n == 37
+        return, "%"
+    /end
+    if, n == 38
+        return, "&"
+    /end
+    if, n == 39
+        return, "'"
+    /end
+    if, n == 40
+        return, "("
+    /end
+    if, n == 41
+        return, ")"
+    /end
+    if, n == 42
+        return, "*"
+    /end
+    if, n == 43
+        return, "+"
+    /end
+    if, n == 44
+        return, ","
+    /end
+    if, n == 45
+        return, "-"
+    /end
+    if, n == 46
+        return, "."
+    /end
+    if, n == 47
+        return, "/"
+    /end
+    if, n >= 48
+        if, n <= 57
+            # Digits 0-9
+            return, core_digit_char(n - 48)
+        /end
+    /end
+    if, n >= 65
+        if, n <= 90
+            # Uppercase A-Z
+            return, core_upper_char(n - 65)
+        /end
+    /end
+    if, n >= 97
+        if, n <= 122
+            # Lowercase a-z
+            return, core_lower_char(n - 97)
+        /end
+    /end
+    return, "?"
+/end
+
+fn, core_digit_char(d)
+    if, d == 0
+        return, "0"
+    /end
+    if, d == 1
+        return, "1"
+    /end
+    if, d == 2
+        return, "2"
+    /end
+    if, d == 3
+        return, "3"
+    /end
+    if, d == 4
+        return, "4"
+    /end
+    if, d == 5
+        return, "5"
+    /end
+    if, d == 6
+        return, "6"
+    /end
+    if, d == 7
+        return, "7"
+    /end
+    if, d == 8
+        return, "8"
+    /end
+    return, "9"
+/end
+
+fn, core_upper_char(d)
+    if, d == 0
+        return, "A"
+    /end
+    if, d == 1
+        return, "B"
+    /end
+    if, d == 2
+        return, "C"
+    /end
+    if, d == 3
+        return, "D"
+    /end
+    if, d == 4
+        return, "E"
+    /end
+    if, d == 5
+        return, "F"
+    /end
+    if, d == 6
+        return, "G"
+    /end
+    if, d == 7
+        return, "H"
+    /end
+    if, d == 8
+        return, "I"
+    /end
+    if, d == 9
+        return, "J"
+    /end
+    if, d == 10
+        return, "K"
+    /end
+    if, d == 11
+        return, "L"
+    /end
+    if, d == 12
+        return, "M"
+    /end
+    if, d == 13
+        return, "N"
+    /end
+    if, d == 14
+        return, "O"
+    /end
+    if, d == 15
+        return, "P"
+    /end
+    if, d == 16
+        return, "Q"
+    /end
+    if, d == 17
+        return, "R"
+    /end
+    if, d == 18
+        return, "S"
+    /end
+    if, d == 19
+        return, "T"
+    /end
+    if, d == 20
+        return, "U"
+    /end
+    if, d == 21
+        return, "V"
+    /end
+    if, d == 22
+        return, "W"
+    /end
+    if, d == 23
+        return, "X"
+    /end
+    if, d == 24
+        return, "Y"
+    /end
+    return, "Z"
+/end
+
+fn, core_lower_char(d)
+    if, d == 0
+        return, "a"
+    /end
+    if, d == 1
+        return, "b"
+    /end
+    if, d == 2
+        return, "c"
+    /end
+    if, d == 3
+        return, "d"
+    /end
+    if, d == 4
+        return, "e"
+    /end
+    if, d == 5
+        return, "f"
+    /end
+    if, d == 6
+        return, "g"
+    /end
+    if, d == 7
+        return, "h"
+    /end
+    if, d == 8
+        return, "i"
+    /end
+    if, d == 9
+        return, "j"
+    /end
+    if, d == 10
+        return, "k"
+    /end
+    if, d == 11
+        return, "l"
+    /end
+    if, d == 12
+        return, "m"
+    /end
+    if, d == 13
+        return, "n"
+    /end
+    if, d == 14
+        return, "o"
+    /end
+    if, d == 15
+        return, "p"
+    /end
+    if, d == 16
+        return, "q"
+    /end
+    if, d == 17
+        return, "r"
+    /end
+    if, d == 18
+        return, "s"
+    /end
+    if, d == 19
+        return, "t"
+    /end
+    if, d == 20
+        return, "u"
+    /end
+    if, d == 21
+        return, "v"
+    /end
+    if, d == 22
+        return, "w"
+    /end
+    if, d == 23
+        return, "x"
+    /end
+    if, d == 24
+        return, "y"
+    /end
+    return, "z"
+/end
+
+fn, core_ord(s)
+    # Convert single-character string to integer (ASCII).
+    if, s == " "
+        return, 32
+    /end
+    if, s == "!"
+        return, 33
+    /end
+    if, s == "\""
+        return, 34
+    /end
+    if, s == "#"
+        return, 35
+    /end
+    if, s == "$"
+        return, 36
+    /end
+    if, s == "%"
+        return, 37
+    /end
+    if, s == "&"
+        return, 38
+    /end
+    if, s == "'"
+        return, 39
+    /end
+    if, s == "("
+        return, 40
+    /end
+    if, s == ")"
+        return, 41
+    /end
+    if, s == "*"
+        return, 42
+    /end
+    if, s == "+"
+        return, 43
+    /end
+    if, s == ","
+        return, 44
+    /end
+    if, s == "-"
+        return, 45
+    /end
+    if, s == "."
+        return, 46
+    /end
+    if, s == "/"
+        return, 47
+    /end
+    if, s == "0"
+        return, 48
+    /end
+    if, s == "1"
+        return, 49
+    /end
+    if, s == "2"
+        return, 50
+    /end
+    if, s == "3"
+        return, 51
+    /end
+    if, s == "4"
+        return, 52
+    /end
+    if, s == "5"
+        return, 53
+    /end
+    if, s == "6"
+        return, 54
+    /end
+    if, s == "7"
+        return, 55
+    /end
+    if, s == "8"
+        return, 56
+    /end
+    if, s == "9"
+        return, 57
+    /end
+    if, s == ":"
+        return, 58
+    /end
+    if, s == ";"
+        return, 59
+    /end
+    if, s == "<"
+        return, 60
+    /end
+    if, s == "="
+        return, 61
+    /end
+    if, s == ">"
+        return, 62
+    /end
+    if, s == "?"
+        return, 63
+    /end
+    if, s == "@"
+        return, 64
+    /end
+    if, s == "A"
+        return, 65
+    /end
+    if, s == "B"
+        return, 66
+    /end
+    if, s == "C"
+        return, 67
+    /end
+    if, s == "D"
+        return, 68
+    /end
+    if, s == "E"
+        return, 69
+    /end
+    if, s == "F"
+        return, 70
+    /end
+    if, s == "G"
+        return, 71
+    /end
+    if, s == "H"
+        return, 72
+    /end
+    if, s == "I"
+        return, 73
+    /end
+    if, s == "J"
+        return, 74
+    /end
+    if, s == "K"
+        return, 75
+    /end
+    if, s == "L"
+        return, 76
+    /end
+    if, s == "M"
+        return, 77
+    /end
+    if, s == "N"
+        return, 78
+    /end
+    if, s == "O"
+        return, 79
+    /end
+    if, s == "P"
+        return, 80
+    /end
+    if, s == "Q"
+        return, 81
+    /end
+    if, s == "R"
+        return, 82
+    /end
+    if, s == "S"
+        return, 83
+    /end
+    if, s == "T"
+        return, 84
+    /end
+    if, s == "U"
+        return, 85
+    /end
+    if, s == "V"
+        return, 86
+    /end
+    if, s == "W"
+        return, 87
+    /end
+    if, s == "X"
+        return, 88
+    /end
+    if, s == "Y"
+        return, 89
+    /end
+    if, s == "Z"
+        return, 90
+    /end
+    if, s == "["
+        return, 91
+    /end
+    if, s == "\\"
+        return, 92
+    /end
+    if, s == "]"
+        return, 93
+    /end
+    if, s == "^"
+        return, 94
+    /end
+    if, s == "_"
+        return, 95
+    /end
+    if, s == "`"
+        return, 96
+    /end
+    if, s == "a"
+        return, 97
+    /end
+    if, s == "b"
+        return, 98
+    /end
+    if, s == "c"
+        return, 99
+    /end
+    if, s == "d"
+        return, 100
+    /end
+    if, s == "e"
+        return, 101
+    /end
+    if, s == "f"
+        return, 102
+    /end
+    if, s == "g"
+        return, 103
+    /end
+    if, s == "h"
+        return, 104
+    /end
+    if, s == "i"
+        return, 105
+    /end
+    if, s == "j"
+        return, 106
+    /end
+    if, s == "k"
+        return, 107
+    /end
+    if, s == "l"
+        return, 108
+    /end
+    if, s == "m"
+        return, 109
+    /end
+    if, s == "n"
+        return, 110
+    /end
+    if, s == "o"
+        return, 111
+    /end
+    if, s == "p"
+        return, 112
+    /end
+    if, s == "q"
+        return, 113
+    /end
+    if, s == "r"
+        return, 114
+    /end
+    if, s == "s"
+        return, 115
+    /end
+    if, s == "t"
+        return, 116
+    /end
+    if, s == "u"
+        return, 117
+    /end
+    if, s == "v"
+        return, 118
+    /end
+    if, s == "w"
+        return, 119
+    /end
+    if, s == "x"
+        return, 120
+    /end
+    if, s == "y"
+        return, 121
+    /end
+    if, s == "z"
+        return, 122
+    /end
+    if, s == "{"
+        return, 123
+    /end
+    if, s == "|"
+        return, 124
+    /end
+    if, s == "}"
+        return, 125
+    /end
+    if, s == "~"
+        return, 126
+    /end
+    if, s == "\n"
+        return, 10
+    /end
+    if, s == "\t"
+        return, 9
+    /end
+    if, s == "\r"
+        return, 13
+    /end
+    return, 0
+/end
+
+# ── List operations ───────────────────────────────────────
+
+fn, core_concat(a, b)
+    return, a + b
+/end
+
+fn, core_contains(xs, item)
+    if, type_of(xs) == "str"
+        if, core_index_of(xs, item) >= 0
+            return, true
+        /end
+        return, false
+    /end
+    for, x, in, xs
+        if, x == item
+            return, true
+        /end
+    /end
+    return, false
+/end
+
+fn, core_find(xs, item)
+    set, i, 0
+    for, x, in, xs
+        if, x == item
+            return, i
+        /end
+        set, i, i + 1
+    /end
+    return, -1
+/end
+
+fn, core_find_all(xs, item)
+    set, result, []
+    set, i, 0
+    for, x, in, xs
+        if, x == item
+            set, result, result + [i]
+        /end
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_first(xs)
+    for, x, in, xs
+        return, x
+    /end
+    return, null
+/end
+
+fn, core_last(xs)
+    set, result, null
+    for, x, in, xs
+        set, result, x
+    /end
+    return, result
+/end
+
+fn, core_enumerate(xs)
+    set, result, []
+    set, i, 0
+    for, x, in, xs
+        set, result, result + [[i, x]]
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_zip(a, b)
+    set, result, []
+    set, i, 0
+    while, i < a#
+        if, i >= b#
+            return, result
+        /end
+        set, result, result + [[a[i], b[i]]]
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_map(f, xs)
+    set, result, []
+    for, x, in, xs
+        set, result, result + [f(x)]
+    /end
+    return, result
+/end
+
+fn, core_filter(f, xs)
+    set, result, []
+    for, x, in, xs
+        if, f(x)
+            set, result, result + [x]
+        /end
+    /end
+    return, result
+/end
+
+fn, core_reduce(f, xs, init)
+    set, acc, init
+    for, x, in, xs
+        set, acc, f(acc, x)
+    /end
+    return, acc
+/end
+
+fn, core_reversed(xs)
+    set, result, []
+    set, i, xs# - 1
+    while, i >= 0
+        set, result, result + [xs[i]]
+        set, i, i - 1
+    /end
+    return, result
+/end
+
+fn, core_sorted(xs)
+    # Simple insertion sort (pure Vredrs, no FFI).
+    set, result, []
+    for, x, in, xs
+        set, inserted, false
+        set, j, 0
+        while, j < result#
+            if, x < result[j]
+                set, result, result[0:j] + [x] + result[j:]
+                set, inserted, true
+                break
+            /end
+            set, j, j + 1
+        /end
+        if, not inserted
+            set, result, result + [x]
+        /end
+    /end
+    return, result
+/end
+
+fn, core_sorted_desc(xs)
+    set, result, []
+    for, x, in, xs
+        set, inserted, false
+        set, j, 0
+        while, j < result#
+            if, x > result[j]
+                set, result, result[0:j] + [x] + result[j:]
+                set, inserted, true
+                break
+            /end
+            set, j, j + 1
+        /end
+        if, not inserted
+            set, result, result + [x]
+        /end
+    /end
+    return, result
+/end
+
+# ── String operations ─────────────────────────────────────
+
+fn, core_split(s, sep)
+    # Split string by separator.
+    set, result, []
+    if, sep == ""
+        # Split into individual characters.
+        set, i, 0
+        while, i < s#
+            set, result, result + [s[i:i+1]]
+            set, i, i + 1
+        /end
+        return, result
+    /end
+    set, start, 0
+    set, i, 0
+    while, i <= s# - sep#
+        if, s[i:i+sep#] == sep
+            set, result, result + [s[start:i]]
+            set, start, i + sep#
+            set, i, i + sep#
+        else
+            set, i, i + 1
+        /end
+    /end
+    set, result, result + [s[start:]]
+    return, result
+/end
+
+fn, core_join(xs, sep)
+    set, result, ""
+    set, first, true
+    for, x, in, xs
+        if, first
+            set, result, str(x)
+            set, first, false
+        else
+            set, result, result + sep + str(x)
+        /end
+    /end
+    return, result
+/end
+
+fn, core_replace(s, old_str, new_str)
+    # Replace all occurrences of old with new in s.
+    set, result, ""
+    set, i, 0
+    while, i < s#
+        if, i <= s# - old#
+            if, s[i:i+old_str#] == old
+                set, result, result + new_str
+                set, i, i + old_str#
+            else
+                set, result, result + s[i:i+1]
+                set, i, i + 1
+            /end
+        else
+            set, result, result + s[i:i+1]
+            set, i, i + 1
+        /end
+    /end
+    return, result
+/end
+
+fn, core_trim(s)
+    # Trim whitespace from both ends.
+    set, start, 0
+    set, end, s#
+    while, start < end
+        set, c, s[start:start+1]
+        if, c == " "
+            set, start, start + 1
+        elif, c == "\t"
+            set, start, start + 1
+        elif, c == "\n"
+            set, start, start + 1
+        elif, c == "\r"
+            set, start, start + 1
+        else
+            break
+        /end
+    /end
+    while, end > start
+        set, c, s[end-1:end]
+        if, c == " "
+            set, end, end - 1
+        elif, c == "\t"
+            set, end, end - 1
+        elif, c == "\n"
+            set, end, end - 1
+        elif, c == "\r"
+            set, end, end - 1
+        else
+            break
+        /end
+    /end
+    return, s[start:end]
+/end
+
+fn, core_upper(s)
+    # Convert to uppercase.
+    set, result, ""
+    set, i, 0
+    while, i < s#
+        set, c, s[i:i+1]
+        set, code, core_ord(c)
+        if, code >= 97
+            if, code <= 122
+                set, result, result + core_chr(code - 32)
+            else
+                set, result, result + c
+            /end
+        else
+            set, result, result + c
+        /end
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_lower(s)
+    set, result, ""
+    set, i, 0
+    while, i < s#
+        set, c, s[i:i+1]
+        set, code, core_ord(c)
+        if, code >= 65
+            if, code <= 90
+                set, result, result + core_chr(code + 32)
+            else
+                set, result, result + c
+            /end
+        else
+            set, result, result + c
+        /end
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_starts_with(s, prefix)
+    if, s# < prefix#
+        return, false
+    /end
+    return, s[0:prefix#] == prefix
+/end
+
+fn, core_ends_with(s, suffix)
+    if, s# < suffix#
+        return, false
+    /end
+    return, s[s#-suffix#:] == suffix
+/end
+
+fn, core_index_of(s, sub)
+    set, i, 0
+    while, i <= s# - sub#
+        if, s[i:i+sub#] == sub
+            return, i
+        /end
+        set, i, i + 1
+    /end
+    return, -1
+/end
+
+fn, core_repeat(s, n)
+    set, result, ""
+    set, i, 0
+    while, i < n
+        set, result, result + s
+        set, i, i + 1
+    /end
+    return, result
+/end
+
+fn, core_reverse(s)
+    set, result, ""
+    set, i, s# - 1
+    while, i >= 0
+        set, result, result + s[i:i+1]
+        set, i, i - 1
+    /end
+    return, result
+/end
+
+# ── JSON (pure Vredrs) ────────────────────────────────────
+
+fn, core_json_stringify(v)
+    if, v == null
+        return, "null"
+    /end
+    if, v == true
+        return, "true"
+    /end
+    if, v == false
+        return, "false"
+    /end
+    set, t, type_of(v)
+    if, t == "int"
+        return, str(v)
+    /end
+    if, t == "float"
+        return, str(v)
+    /end
+    if, t == "str"
+        return, "\"" + v + "\""
+    /end
+    if, t == "list"
+        set, parts, []
+        for, item, in, v
+            set, parts, parts + [core_json_stringify(item)]
+        /end
+        return, "[" + core_join(parts, ",") + "]"
+    /end
+    if, t == "dict"
+        set, parts, []
+        set, ks, keys(v)
+        for, k, in, ks
+            set, parts, parts + ["\"" + k + "\":" + core_json_stringify(v[k])]
+        /end
+        return, "{" + core_join(parts, ",") + "}"
+    /end
+    return, "null"
+/end
+
+fn, core_json_parse(text)
+    # Simplified JSON parser: handles objects, arrays, strings, numbers, bools, null.
+    # This is a recursive descent parser in pure Vredrs.
+    set, state, core_json_parser_new(text)
+    return, core_json_parse_value(state)
+/end
+
+fn, core_json_parser_new(text)
+    return, {"text": text, "pos": 0}
+/end
+
+fn, core_json_parse_value(state)
+    core_json_skip_ws(state)
+    set, c, core_json_peek(state)
+    if, c == "{"
+        return, core_json_parse_object(state)
+    /end
+    if, c == "["
+        return, core_json_parse_array(state)
+    /end
+    if, c == "\""
+        return, core_json_parse_string(state)
+    /end
+    if, c == "t"
+        return, core_json_parse_true(state)
+    /end
+    if, c == "f"
+        return, core_json_parse_false(state)
+    /end
+    if, c == "n"
+        return, core_json_parse_null(state)
+    /end
+    return, core_json_parse_number(state)
+/end
+
+fn, core_json_peek(state)
+    set, p, state["pos"]
+    set, t, state["text"]
+    if, p >= t#
+        return, ""
+    /end
+    return, t[p:p+1]
+/end
+
+fn, core_json_skip_ws(state)
+    set, t, state["text"]
+    while, state["pos"] < t#
+        set, c, t[state["pos"]:state["pos"]+1]
+        if, c == " "
+            state["pos"] = state["pos"] + 1
+        /end
+        if, c == "\t"
+            state["pos"] = state["pos"] + 1
+        /end
+        if, c == "\n"
+            state["pos"] = state["pos"] + 1
+        /end
+        if, c == "\r"
+            state["pos"] = state["pos"] + 1
+        else
+            return
+        /end
+    /end
+/end
+
+fn, core_json_parse_string(state)
+    set, t, state["text"]
+    # Skip opening quote.
+    state["pos"] = state["pos"] + 1
+    set, result, ""
+    while, state["pos"] < t#
+        set, c, t[state["pos"]:state["pos"]+1]
+        state["pos"] = state["pos"] + 1
+        if, c == "\""
+            return, result
+        /end
+        if, c == "\\"
+            # Escape sequence.
+            set, next, t[state["pos"]:state["pos"]+1]
+            state["pos"] = state["pos"] + 1
+            if, next == "n"
+                set, result, result + "\n"
+            elif, next == "t"
+                set, result, result + "\t"
+            elif, next == "r"
+                set, result, result + "\r"
+            elif, next == "\""
+                set, result, result + "\""
+            elif, next == "\\"
+                set, result, result + "\\"
+            else
+                set, result, result + next
+            /end
+        else
+            set, result, result + c
+        /end
+    /end
+    return, result
+/end
+
+fn, core_json_parse_number(state)
+    set, t, state["text"]
+    set, start, state["pos"]
+    while, state["pos"] < t#
+        set, c, t[state["pos"]:state["pos"]+1]
+        if, c == "0"
+            state["pos"] = state["pos"] + 1
+        elif, c == "1"
+            state["pos"] = state["pos"] + 1
+        elif, c == "2"
+            state["pos"] = state["pos"] + 1
+        elif, c == "3"
+            state["pos"] = state["pos"] + 1
+        elif, c == "4"
+            state["pos"] = state["pos"] + 1
+        elif, c == "5"
+            state["pos"] = state["pos"] + 1
+        elif, c == "6"
+            state["pos"] = state["pos"] + 1
+        elif, c == "7"
+            state["pos"] = state["pos"] + 1
+        elif, c == "8"
+            state["pos"] = state["pos"] + 1
+        elif, c == "9"
+            state["pos"] = state["pos"] + 1
+        elif, c == "."
+            state["pos"] = state["pos"] + 1
+        elif, c == "-"
+            state["pos"] = state["pos"] + 1
+        else
+            break
+        /end
+    /end
+    set, numstr, t[start:state["pos"]]
+    if, core_index_of(numstr, ".") >= 0
+        return, float(numstr)
+    /end
+    return, int(numstr)
+/end
+
+fn, core_json_parse_true(state)
+    state["pos"] = state["pos"] + 4
+    return, true
+/end
+
+fn, core_json_parse_false(state)
+    state["pos"] = state["pos"] + 5
+    return, false
+/end
+
+fn, core_json_parse_null(state)
+    state["pos"] = state["pos"] + 4
+    return, null
+/end
+
+fn, core_json_parse_array(state)
+    set, t, state["text"]
+    state["pos"] = state["pos"] + 1
+    set, result, []
+    core_json_skip_ws(state)
+    if, core_json_peek(state) == "]"
+        state["pos"] = state["pos"] + 1
+        return, result
+    /end
+    while, state["pos"] < t#
+        set, v, core_json_parse_value(state)
+        set, result, result + [v]
+        core_json_skip_ws(state)
+        set, c, core_json_peek(state)
+        if, c == ","
+            state["pos"] = state["pos"] + 1
+        elif, c == "]"
+            state["pos"] = state["pos"] + 1
+            return, result
+        else
+            return, result
+        /end
+    /end
+    return, result
+/end
+
+fn, core_json_parse_object(state)
+    set, t, state["text"]
+    state["pos"] = state["pos"] + 1
+    set, result, {}
+    core_json_skip_ws(state)
+    if, core_json_peek(state) == "}"
+        state["pos"] = state["pos"] + 1
+        return, result
+    /end
+    while, state["pos"] < t#
+        core_json_skip_ws(state)
+        set, k, core_json_parse_string(state)
+        core_json_skip_ws(state)
+        # Skip colon.
+        state["pos"] = state["pos"] + 1
+        set, v, core_json_parse_value(state)
+        result[k] = v
+        core_json_skip_ws(state)
+        set, c, core_json_peek(state)
+        if, c == ","
+            state["pos"] = state["pos"] + 1
+        elif, c == "}"
+            state["pos"] = state["pos"] + 1
+            return, result
+        else
+            return, result
+        /end
+    /end
+    return, result
+/end
+
+# ── File I/O (pure Vredrs, using unsafe syscalls) ─────────
+# These use the VM's built-in file operations as thin wrappers.
+# The actual syscall implementations live in the VM runtime.
+
+fn, core_file_exists(path)
+    return, file_exists(path)
+/end
+
+fn, core_read_file(path)
+    return, read_file(path)
+/end
+
+fn, core_write_file(path, content)
+    return, write_file(path, content)
+/end
+
+# ── Result type ───────────────────────────────────────────
+
+fn, core_Ok(v)
+    return, {"ok": true, "value": v}
+/end
+
+fn, core_Err(e)
+    return, {"ok": false, "error": e}
+/end
+
+fn, core_is_ok(r)
+    return, r["ok"] == true
+/end
+
+fn, core_is_err(r)
+    return, r["ok"] == false
+/end
+
+fn, core_unwrap(r)
+    if, r["ok"]
+        return, r["value"]
+    /end
+    return, null
+/end
+
+fn, core_unwrap_or(r, default)
+    if, r["ok"]
+        return, r["value"]
+    /end
+    return, default
+/end

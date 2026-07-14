@@ -1,0 +1,12 @@
+fn, swap(a, b)
+    return, b, a
+/end
+fn, main(): int
+    set, x, 1
+    set, y, 2
+    set, x, y = swap(x, y)
+    assert, x == 2
+    assert, y == 1
+    println, "multi assign OK"
+    return, 0
+/end

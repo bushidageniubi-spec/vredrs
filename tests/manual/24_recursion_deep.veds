@@ -1,0 +1,11 @@
+fn, fact(n): int
+    if, n <= 1
+        return, 1
+    /end
+    return, n * fact(n - 1)
+/end
+fn, main(): int
+    assert, fact(10) == 3628800
+    println, "deep recursion OK"
+    return, 0
+/end

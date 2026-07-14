@@ -1,0 +1,11 @@
+fn, identity[T](x: T): T
+    return, x
+/end
+fn, main(): int
+    set, a, identity(42)
+    set, b, identity("hello")
+    assert, a == 42
+    assert, b == "hello"
+    println, "generics OK"
+    return, 0
+/end

@@ -1,0 +1,10 @@
+# Acceptance test: slice syntax
+set, lst = [1, 2, 3, 4, 5]
+set, sub = lst[1:4]
+println, sub
+set, rev = lst[::-1]
+println, rev
+set, s = "hello world"
+set, head = s[:5]
+println, head
+println, "slice OK"

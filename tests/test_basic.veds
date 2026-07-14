@@ -1,0 +1,27 @@
+paste, "=== Basic Tests ===\n"
+set, x, 42
+set, y, 3.14
+set, s, "hello"
+set, b, true
+set, n, null
+paste, "int: "
+paste, x
+paste, "\n"
+paste, "float: "
+paste, y
+paste, "\n"
+paste, "str: "
+paste, s
+paste, "\n"
+paste, "bool: "
+paste, b
+paste, "\n"
+paste, "arithmetic: "
+paste, 10 + 5 * 2 - 3
+paste, "\n"
+paste, "comparison: "
+if, x > 40
+    paste, "x is big\n"
+else
+    paste, "x is small\n"
+/end

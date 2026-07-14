@@ -1,0 +1,9 @@
+# Test Bug 4: lazy set / lazy fn
+lazy set, X = 42
+println, X
+lazy set, Y = 1 + 2 + 3
+println, Y
+lazy fn, greet(name)
+    return, "hi " + name
+/end
+println, greet("world")

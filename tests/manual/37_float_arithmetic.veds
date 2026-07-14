@@ -1,0 +1,9 @@
+fn, main(): int
+    set, x, 3.14
+    set, y, 2.0
+    set, z, x + y
+    assert, z > 5.0
+    assert, z < 6.0
+    println, "float arithmetic OK"
+    return, 0
+/end

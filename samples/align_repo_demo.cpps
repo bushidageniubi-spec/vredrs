@@ -1,0 +1,21 @@
+# Example: @align on struct + @repo for package layout.  Compile with:
+#   vredrs build samples/align_repo_demo.cpps -o /tmp/arl --raw
+# The C* PIR backend treats @align(N) struct as a package-layout marker
+# (emitted to .pkgmeta) and @repo as the package partitioning config that
+# drives the .pkg.h / .layout.map / .pkg.bin side artifacts.
+
+@align(64)
+struct, DMA_Descriptor
+    addr, u64
+    length, u32
+    status, u8
+/end
+
+@repo {
+    sources: "local:drivers local:app"
+    split_by: "size"
+}
+
+fn, main()
+    set, x = 0
+/end

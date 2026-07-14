@@ -1,0 +1,10 @@
+fn, main(): int
+    set, name, "World"
+    set, greeting, "Hello, {name}!"
+    assert, greeting == "Hello, World!"
+    set, n, 42
+    set, msg, "n = {n}"
+    assert, msg == "n = 42"
+    println, "string interp OK"
+    return, 0
+/end

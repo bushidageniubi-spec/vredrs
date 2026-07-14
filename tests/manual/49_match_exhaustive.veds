@@ -1,0 +1,20 @@
+fn, day_name(n): int
+    match, n
+        case, 0
+            return, 100
+        case, 1
+            return, 200
+        case, 2
+            return, 300
+        case, _
+            return, 999
+    /end
+/end
+fn, main(): int
+    assert, day_name(0) == 100
+    assert, day_name(1) == 200
+    assert, day_name(2) == 300
+    assert, day_name(5) == 999
+    println, "match exhaustive OK"
+    return, 0
+/end

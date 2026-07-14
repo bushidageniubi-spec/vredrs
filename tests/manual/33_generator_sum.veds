@@ -1,0 +1,20 @@
+fn, naturals()
+    yield, 1
+    yield, 2
+    yield, 3
+    yield, 4
+    yield, 5
+/end
+fn, main(): int
+    set, g, naturals()
+    set, sum, 0
+    set, i, 0
+    while, i < 5
+        set, v, resume(g)
+        set, sum, sum + v
+        set, i, i + 1
+    /end
+    assert, sum == 15
+    println, "generator sum OK"
+    return, 0
+/end

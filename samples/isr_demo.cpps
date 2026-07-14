@@ -1,0 +1,10 @@
+# Example: @isr_group with WCET budget.  Compile with:
+#   vredrs build samples/isr_demo.cpps -o /tmp/isr --raw
+# The handler is registered in the .isr section with priority and budget.
+# The C* PIR backend statically estimates WCET and rejects handlers whose
+# estimated cycle count exceeds the budget.
+
+@isr_group(budget_us=100, priority=1)
+fn, timer_irq()
+    set, counter = 0
+/end

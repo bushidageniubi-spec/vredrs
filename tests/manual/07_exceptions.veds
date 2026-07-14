@@ -1,0 +1,10 @@
+fn, main(): int
+    try
+        throw, "oops"
+    catch, e
+        assert, e == "oops"
+        println, "exceptions OK"
+        return, 0
+    /end
+    return, 1
+/end

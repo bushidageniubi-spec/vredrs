@@ -1,0 +1,13 @@
+# Example: @section placement.  Compile with:
+#   vredrs build samples/section_demo.cpps -o /tmp/sec --raw
+# The function boot_entry lands in .text.boot; isr_handler lands in .isr.
+
+@section(".text.boot")
+fn, boot_entry()
+    set, sp = 0
+/end
+
+@section(".isr")
+fn, isr_handler()
+    set, pending = 1
+/end

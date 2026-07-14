@@ -1,0 +1,17 @@
+fn, classify(n: int): int
+    match, n
+        case, 0
+            return, 1
+        case, 1
+            return, 2
+        case, _
+            return, 3
+    /end
+/end
+fn, main(): int
+    assert, classify(0) == 1
+    assert, classify(1) == 2
+    assert, classify(5) == 3
+    println, "match OK"
+    return, 0
+/end

@@ -1,0 +1,9 @@
+fn, main(): int
+    set, s, "Hello World"
+    assert, s# == 11
+    assert, s == "Hello World"
+    set, parts, split(s, " ")
+    assert, parts# == 2
+    println, "string methods OK"
+    return, 0
+/end

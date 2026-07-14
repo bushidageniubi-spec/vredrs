@@ -1,0 +1,18 @@
+fn, fib_iter(n): int
+    set, a, 0
+    set, b, 1
+    set, i, 0
+    while, i < n
+        set, tmp, a + b
+        set, a, b
+        set, b, tmp
+        set, i, i + 1
+    /end
+    return, a
+/end
+fn, main(): int
+    assert, fib_iter(10) == 55
+    assert, fib_iter(20) == 6765
+    println, "fibonacci iter OK"
+    return, 0
+/end

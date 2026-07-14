@@ -1,0 +1,9 @@
+fn, main(): int
+    set, d, {"a": {"b": {"c": 42}}}
+    set, inner, d["a"]
+    set, inner2, inner["b"]
+    set, val, inner2["c"]
+    assert, val == 42
+    println, "nested data OK"
+    return, 0
+/end

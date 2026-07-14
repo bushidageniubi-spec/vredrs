@@ -1,0 +1,12 @@
+# File I/O
+set, content, "line 1\nline 2\n"
+set, written, write_file("/tmp/vredrs_example.txt", content)
+paste, "wrote "
+paste, written
+paste, " bytes\n"
+set, data, read_file("/tmp/vredrs_example.txt")
+paste, "read: "
+paste, data
+if, file_exists("/tmp/vredrs_example.txt")
+    paste, "file exists\n"
+/end

@@ -1,0 +1,34 @@
+[package]
+name = "vredrs_compiler"
+version = "0.1.5"
+edition = "2021"
+rust-version = "1.70"
+license = "MIT"
+authors = ["Alan Chen"]
+description = "Vredrs language compiler and interpreter"
+repository = "https://github.com/vredrs/vredrs"
+keywords = ["language", "compiler", "interpreter", "vm"]
+categories = ["compilers", "development-tools"]
+
+[lib]
+name = "vredrs_compiler"
+path = "src/lib.rs"
+
+[[bin]]
+name = "vredrs"
+path = "src/main.rs"
+
+[dependencies]
+flate2 = "1.0"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "compile_bench"
+harness = false

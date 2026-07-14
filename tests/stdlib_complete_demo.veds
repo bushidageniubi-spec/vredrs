@@ -1,0 +1,125 @@
+# Vredrs 0.1.3 — 剩余 4 模块 + 补全测试
+println, "=== 剩余模块补全测试 ==="
+
+# ─── image ────────────────────────────────────────────
+import, "image"
+println, "--- image ---"
+set, img = image.new(3, 2)
+println, "width = " + str(img.width())
+println, "height = " + str(img.height())
+img.set_pixel(0, 0, 255, 0, 0, 255)
+img.set_pixel(1, 0, 0, 255, 0, 255)
+img.set_pixel(2, 0, 0, 0, 255, 255)
+set, px = img.pixel(0, 0)
+println, "pixel(0,0) = " + str(px)
+set, px2 = img.pixel(1, 0)
+println, "pixel(1,0) = " + str(px2)
+set, ok = image.save(img, "/tmp/test_img.ppm")
+println, "save ppm = " + str(ok)
+set, ok2 = image.save(img, "/tmp/test_img.bmp")
+println, "save bmp = " + str(ok2)
+set, loaded = image.load("/tmp/test_img.ppm")
+println, "loaded width = " + str(loaded.width())
+set, loaded_px = loaded.pixel(0, 0)
+println, "loaded pixel(0,0) = " + str(loaded_px)
+set, cropped = image.crop(img, 0, 0, 2, 1)
+println, "crop width = " + str(cropped.width())
+set, resized = image.resize(img, 6, 4)
+println, "resize width = " + str(resized.width())
+
+# ─── machine ──────────────────────────────────────────
+import, "machine"
+println, "--- machine ---"
+set, p = machine.gpio.pin(5, "out")
+p.set(true)
+println, "pin get = " + str(p.get())
+p.set(false)
+println, "pin get = " + str(p.get())
+set, i2c = machine.i2c.init(0, 100000)
+set, r = i2c.read(0x50, 0, 4)
+println, "i2c read = " + str(r)
+i2c.write(0x50, 0, [1, 2, 3])
+set, spi = machine.spi.init(0, 0, 1000000)
+set, tx = spi.transfer([0xAA, 0xBB])
+println, "spi transfer = " + str(tx)
+set, ser = machine.serial.open("/dev/ttyS0", 9600)
+ser.write([0x01, 0x02])
+println, "serial read = " + str(ser.read(4))
+ser.close()
+
+# ─── unsafe ───────────────────────────────────────────
+import, "unsafe"
+println, "--- unsafe ---"
+println, "sizeof(int) = " + str(unsafe.sizeof("int"))
+println, "sizeof(float) = " + str(unsafe.sizeof("float"))
+println, "alignof(int) = " + str(unsafe.alignof("int"))
+println, "offsetof = " + str(unsafe.offsetof("Point", "x"))
+set, v = unsafe.cast(42, "float")
+println, "cast = " + str(v)
+set, ptr = unsafe.alloc(64)
+println, "alloc = " + str(ptr)
+unsafe.free(ptr)
+
+# ─── embed ────────────────────────────────────────────
+import, "embed"
+import, "fs"
+println, "--- embed ---"
+# embed.fs(dir) — 嵌入目录，fs.read 读取嵌入文件
+set, efs = embed.fs("/tmp")
+set, exists = efs.exists("test_img.ppm")
+println, "embedded exists = " + str(exists)
+set, content = efs.read("test_img.ppm")
+println, "embedded read len = " + str(len(content))
+set, files = efs.list()
+println, "embedded list count = " + str(len(files))
+# embed.read(path) — 等价于 @embed 注解运行时行为
+set, c2 = embed.read("/tmp/test_img.ppm")
+println, "embed.read len = " + str(len(c2))
+
+# ─── crypto.aes + bcrypt ─────────────────────────────
+import, "crypto"
+println, "--- crypto.aes/bcrypt ---"
+set, key = "0123456789abcdef0123456789abcdef"
+set, iv = "0123456789abcdef"
+set, plaintext = "Hello, AES!"
+set, ct = crypto.aes_encrypt(key, iv, plaintext)
+println, "aes ciphertext len = " + str(len(ct))
+set, pt = crypto.aes_decrypt(key, iv, ct)
+println, "aes decrypt = " + str(pt)
+set, h = crypto.bcrypt.hash("mypassword", 4)
+println, "bcrypt hash = " + h
+set, v1 = crypto.bcrypt.verify("mypassword", h)
+println, "bcrypt verify correct = " + str(v1)
+set, v2 = crypto.bcrypt.verify("wrongpassword", h)
+println, "bcrypt verify wrong = " + str(v2)
+
+# ─── websocket ───────────────────────────────────────
+import, "websocket"
+println, "--- websocket ---"
+set, ws = websocket.connect("ws://localhost:8080")
+ws.send_text("hello")
+ws.send_binary([1, 2, 3])
+set, msg = ws.receive()
+println, "receive = " + str(msg)
+ws.close()
+
+# ─── sync.atomic ─────────────────────────────────────
+import, "sync"
+println, "--- sync.atomic ---"
+set, counter = [0]
+set, counter = sync.atomic.store_int(counter, 42)
+set, val = sync.atomic.load_int(counter)
+println, "load = " + str(val)
+set, counter = sync.atomic.add_int(counter, 10)
+set, val2 = sync.atomic.load_int(counter)
+println, "after add = " + str(val2)
+set, cas_ok = sync.atomic.compare_and_swap_int(counter, 52, 100)
+println, "cas = " + str(cas_ok)
+
+# ─── sql ─────────────────────────────────────────────
+import, "sql"
+println, "--- sql ---"
+println, "drivers = " + str(sql.drivers())
+
+println, ""
+println, "=== 全部补全模块测试完成 ==="

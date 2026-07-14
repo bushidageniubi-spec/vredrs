@@ -1,0 +1,13 @@
+# Test Bug 8: implicit return
+fn, double(x)
+    x * 2
+/end
+println, double(5)
+fn, add(a, b)
+    a + b
+/end
+println, add(3, 4)
+fn, with_explicit_return(x)
+    return, x + 100
+/end
+println, with_explicit_return(1)

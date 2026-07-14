@@ -1,0 +1,8 @@
+fn, main(): int
+    set, a, 2 * 2 * 2 * 2
+    assert, a == 16
+    set, b, 256 / 4
+    assert, b == 64
+    println, "bitwise OK"
+    return, 0
+/end

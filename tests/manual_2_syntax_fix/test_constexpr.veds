@@ -1,0 +1,5 @@
+# Test Bug 3: constexpr
+constexpr, PI = 314
+println, PI
+constexpr, GREETING = "hello"
+println, GREETING

@@ -1,0 +1,22 @@
+class, FileManager
+    fn, new(path)
+        set, self.path, path
+        set, self.opened, true
+        return, self
+    /end
+    fn, __enter__()
+        return, self
+    /end
+    fn, __exit__()
+        set, self.opened, false
+    /end
+/end
+fn, main(): int
+    set, fm, FileManager.new("test.txt")
+    with, fm, as, f
+        assert, f.opened == true
+    /end
+    assert, fm.opened == false
+    println, "with OK"
+    return, 0
+/end

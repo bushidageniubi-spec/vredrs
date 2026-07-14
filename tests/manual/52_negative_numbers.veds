@@ -1,0 +1,12 @@
+fn, main(): int
+    set, x, -42
+    assert, x == -42
+    set, y, 0 - 100
+    assert, y == -100
+    set, z, x + y
+    assert, z == -142
+    assert, x < 0
+    assert, y < x
+    println, "negative numbers OK"
+    return, 0
+/end

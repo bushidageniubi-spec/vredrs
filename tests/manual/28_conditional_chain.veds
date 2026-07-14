@@ -1,0 +1,20 @@
+fn, classify(n): int
+    if, n < 0
+        return, -1
+    /end
+    if, n == 0
+        return, 0
+    /end
+    if, n < 10
+        return, 1
+    /end
+    return, 2
+/end
+fn, main(): int
+    assert, classify(-5) == -1
+    assert, classify(0) == 0
+    assert, classify(5) == 1
+    assert, classify(100) == 2
+    println, "conditional chain OK"
+    return, 0
+/end

@@ -1,0 +1,92 @@
+# Vredrs 0.1.4 raw 静态语法测试
+# 这些语法在 VM 模式下解析但不执行（VM 忽略 trait/impl/dtor），
+# 在 raw 后端会进行静态类型检查和所有权/借用检查。
+
+println, "=== 0.1.4 raw 静态语法 ==="
+
+# ─── 1. trait 定义 + impl 实现 ──────────────────────
+trait, Drawable
+    fn, draw(self)
+    /end
+    fn, area(self)
+        return, 0
+    /end
+/end
+
+class, Circle
+    fn, __init__(r)
+        set, self.r = r
+    /end
+    fn, draw(self)
+        return, "○ r=" + str(self.r)
+    /end
+    fn, area(self)
+        return, 3 * self.r * self.r
+    /end
+/end
+
+impl, Drawable for Circle
+    fn, draw(self)
+        return, "impl: " + "○ r=" + str(self.r)
+    /end
+/end
+
+class, Square
+    fn, __init__(s)
+        set, self.s = s
+    /end
+    fn, draw(self)
+        return, "□ s=" + str(self.s)
+    /end
+/end
+
+impl, Drawable for Square
+    fn, draw(self)
+        return, "impl: " + "□ s=" + str(self.s)
+    /end
+/end
+
+# ─── 2. dtor 确定性析构 ─────────────────────────────
+dtor, Circle
+    println, "Circle destroyed"
+/end
+
+dtor, Square
+    println, "Square destroyed"
+/end
+
+# ─── 3. 泛型函数（带类型约束）──────────────────────
+fn, render[T: Drawable](obj: T)
+    return, obj.draw()
+/end
+
+# ─── 4. Result 类型错误处理 ─────────────────────────
+fn, divide(a, b)
+    if, b == 0
+        return, {ok: false, err: "division by zero"}
+    /end
+    return, {ok: true, value: a / b}
+/end
+
+# ─── 5. constexpr 编译时计算 ────────────────────────
+constexpr, PI = 3.14159
+
+# ─── 6. 裸指针类型（仅在 raw 后端生效）──────────────
+# ptr[T] 在 VM 模式下被忽略
+
+# ─── 主程序 ──────────────────────────────────────────
+set, c = Circle(5)
+set, s = Square(4)
+println, c.draw()
+println, s.draw()
+println, "circle area = " + str(c.area())
+
+set, r = divide(10, 2)
+println, "10/2 = " + str(r["value"])
+
+set, r2 = divide(10, 0)
+println, "10/0 err = " + str(r2["err"])
+
+println, "PI = " + str(PI)
+
+println, "=== raw 静态语法测试完成 ==="

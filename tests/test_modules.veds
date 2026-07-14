@@ -1,0 +1,14 @@
+import, "lib/math_lib.veds", factorial, fibonacci, is_prime
+paste, "=== Module Tests ===\n"
+paste, "factorial(5) = "
+paste, factorial(5)
+paste, "\n"
+paste, "fibonacci(10) = "
+paste, fibonacci(10)
+paste, "\n"
+paste, "is_prime(17) = "
+paste, is_prime(17)
+paste, "\n"
+paste, "is_prime(18) = "
+paste, is_prime(18)
+paste, "\n"

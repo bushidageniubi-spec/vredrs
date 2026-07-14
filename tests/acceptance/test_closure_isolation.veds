@@ -1,0 +1,27 @@
+# Acceptance test: closure isolation (call frame isolation).
+# Each call to make_counter() should create a fresh counter
+# with its own independent state.
+
+fn, make_counter()
+    set, count, 0
+    set, inc, fn() count = count + 1
+    return, inc
+/end
+
+set, c1, make_counter()
+set, c2, make_counter()
+
+# c1 and c2 should be independent
+assert, c1() == 1
+assert, c1() == 2
+assert, c2() == 1
+assert, c1() == 3
+
+# Global variable should not be affected by closure mutations
+set, g, 100
+set, c3, make_counter()
+assert, c3() == 1
+assert, c3() == 2
+assert, g == 100
+
+println, "closure isolation OK"

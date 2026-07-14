@@ -1,0 +1,11 @@
+fn, main(): int
+    set, xs, [10, 20, 30]
+    assert, xs# == 3
+    assert, xs[0] == 10
+    assert, xs[2] == 30
+    set, d, {"a": 1, "b": 2}
+    assert, d["a"] == 1
+    assert, d["b"] == 2
+    println, "containers OK"
+    return, 0
+/end

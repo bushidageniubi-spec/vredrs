@@ -1,0 +1,8 @@
+fn, main(): int
+    set, s, "ab"
+    set, r, s * 3
+    assert, r == "ababab"
+    assert, r# == 6
+    println, "string repeat OK"
+    return, 0
+/end

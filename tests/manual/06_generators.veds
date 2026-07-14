@@ -1,0 +1,18 @@
+fn, gen()
+    yield, 1
+    yield, 2
+    yield, 3
+/end
+fn, main(): int
+    set, g, gen()
+    set, sum, 0
+    set, j, 0
+    while, j < 3
+        set, v, resume(g)
+        set, sum, sum + v
+        set, j, j + 1
+    /end
+    assert, sum == 6
+    println, "generators OK"
+    return, 0
+/end

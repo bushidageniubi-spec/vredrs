@@ -1,0 +1,63 @@
+# Extended math library
+# Wraps the built-in math module and adds more functions.
+
+fn, sqrt(x)
+    return, math_sqrt(x)
+/end
+
+fn, pow(base, exp)
+    return, math_pow(base, exp)
+/end
+
+fn, sin(x)
+    return, math_sin(x)
+/end
+
+fn, abs(x)
+    if, x < 0
+        return, 0 - x
+    /end
+    return, x
+/end
+
+fn, floor(x)
+    set, i, int(x)
+    if, x < i
+        return, i - 1
+    /end
+    return, i
+/end
+
+fn, ceil(x)
+    set, i, int(x)
+    if, x > i
+        return, i + 1
+    /end
+    return, i
+/end
+
+fn, round(x)
+    set, i, int(x)
+    set, frac, x - i
+    if, frac >= 0.5
+        return, i + 1
+    /end
+    if, frac <= -0.5
+        return, i - 1
+    /end
+    return, i
+/end
+
+fn, max_val(a, b)
+    if, a > b
+        return, a
+    /end
+    return, b
+/end
+
+fn, min_val(a, b)
+    if, a < b
+        return, a
+    /end
+    return, b
+/end

@@ -1,0 +1,11 @@
+fn, main(): int
+    set, s, ""
+    assert, s# == 0
+    set, s2, "hello"
+    assert, s2# == 5
+    set, s3, "" + "abc"
+    assert, s3# == 3
+    assert, s3 == "abc"
+    println, "edge strings OK"
+    return, 0
+/end

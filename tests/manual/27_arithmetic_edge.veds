@@ -1,0 +1,14 @@
+fn, main(): int
+    set, x, -42
+    set, a, x < 0 ? 0 - x : x
+    assert, a == 42
+    set, b, 42
+    set, a2, b < 0 ? 0 - b : b
+    assert, a2 == 42
+    set, mx, 3 > 7 ? 3 : 7
+    assert, mx == 7
+    set, mn, 3 < 7 ? 3 : 7
+    assert, mn == 3
+    println, "arithmetic edge OK"
+    return, 0
+/end

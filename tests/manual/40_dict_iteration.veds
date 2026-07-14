@@ -1,0 +1,7 @@
+fn, main(): int
+    set, d, {"a": 1, "b": 2, "c": 3}
+    set, sum, d["a"] + d["b"] + d["c"]
+    assert, sum == 6
+    println, "dict iteration OK"
+    return, 0
+/end

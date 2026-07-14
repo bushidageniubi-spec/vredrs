@@ -1,0 +1,8 @@
+fn, main(): int
+    set, d, {"outer": {"inner": 42}}
+    set, inner, d["outer"]
+    set, val, inner["inner"]
+    assert, val == 42
+    println, "nested dict OK"
+    return, 0
+/end

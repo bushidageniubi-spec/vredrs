@@ -1,0 +1,23 @@
+class, Counter
+    fn, new()
+        set, self.count, 0
+        return, self
+    /end
+    fn, add(n)
+        set, self.count, self.count + n
+        return, self.count
+    /end
+    fn, get()
+        return, self.count
+    /end
+/end
+fn, main(): int
+    set, c, Counter.new()
+    set, r1, c.add(5)
+    assert, r1 == 5
+    set, r2, c.add(3)
+    assert, r2 == 8
+    assert, c.get() == 8
+    println, "class method chain OK"
+    return, 0
+/end

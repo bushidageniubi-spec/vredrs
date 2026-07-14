@@ -1,0 +1,26 @@
+class, A
+    fn, new(v)
+        set, self.v, v
+        return, self
+    /end
+    fn, get()
+        return, self.v
+    /end
+/end
+class, B
+    fn, new(v)
+        set, self.v, v
+        return, self
+    /end
+    fn, get()
+        return, self.v
+    /end
+/end
+fn, main(): int
+    set, a, A.new(100)
+    set, b, B.new(200)
+    assert, a.get() == 100
+    assert, b.get() == 200
+    println, "multiple classes OK"
+    return, 0
+/end

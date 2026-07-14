@@ -1,0 +1,11 @@
+fn, adder(n)
+    return, fn(x) x + n
+/end
+fn, main(): int
+    set, add5, adder(5)
+    set, add10, adder(10)
+    assert, add5(3) == 8
+    assert, add10(3) == 13
+    println, "closures OK"
+    return, 0
+/end

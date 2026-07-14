@@ -1,0 +1,9 @@
+fn, main(): int
+    set, d, {"x": 10, "y": 20}
+    assert, d["x"] == 10
+    assert, d["y"] == 20
+    set, total, d["x"] + d["y"]
+    assert, total == 30
+    println, "dict operations OK"
+    return, 0
+/end

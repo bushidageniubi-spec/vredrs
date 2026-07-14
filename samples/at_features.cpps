@@ -1,0 +1,50 @@
+# Cstar @-feature exercise: @section, @pipeline, @patch, @isr_group,
+# @prefetch, @repo, @embed, @link.  Compile with:
+#   vredrs build samples/at_features.cpps -o /tmp/atf --raw
+# Then inspect /tmp/atf (LLVM IR), /tmp/atf.link.ld (linker script),
+# /tmp/atf.pkg.h / /tmp/atf.layout.map / /tmp/atf.pkg.bin (package layout),
+# and the per-@patch artifact at /tmp/atf_update.patch.
+
+@repo {
+    sources: "local:pkg_a local:pkg_b"
+    split_by: "size"
+    header: "flash_layout.h"
+    map: "layout.map"
+    binary: "pkg_index.bin"
+}
+
+@section(".text.boot")
+fn, boot_entry()
+    set, x = 1
+/end
+
+@section(".isr")
+@isr_group(budget_us=50, priority=2)
+fn, systick_handler()
+    set, count = 0
+/end
+
+@pipeline(priority="high")
+fn, dma_buffer_fill()
+    set, total = 0
+/end
+
+@prefetch(hint="sequential", stride=128)
+fn, scan_buffer()
+    set, sum = 0
+/end
+
+@patch(base="firmware_base.bin", output="/tmp/atf_update.patch")
+fn, hotfixable_routine()
+    set, v = 7
+/end
+
+@embed("samples/simple.cpps")
+fn, embedded_blob()
+    set, mark_val = 1
+/end
+
+@link("libm")
+fn, math_link()
+    set, m = 2
+/end

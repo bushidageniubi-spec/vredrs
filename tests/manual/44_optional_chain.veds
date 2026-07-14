@@ -1,0 +1,9 @@
+fn, main(): int
+    set, d, {"name": "Alice"}
+    set, n, d["name"]
+    assert, n == "Alice"
+    set, missing, d["missing"]
+    assert, missing == null
+    println, "optional chain OK"
+    return, 0
+/end

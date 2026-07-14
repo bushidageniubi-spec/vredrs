@@ -1,0 +1,11 @@
+fn, main(): int
+    set, s, "hello world"
+    assert, s# == 11
+    assert, upper("hello") == "HELLO"
+    assert, lower("WORLD") == "world"
+    assert, contains("hello", "ll")
+    set, parts, split("a,b,c", ",")
+    assert, parts# == 3
+    println, "string ops OK"
+    return, 0
+/end

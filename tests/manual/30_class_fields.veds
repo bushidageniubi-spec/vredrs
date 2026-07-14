@@ -1,0 +1,18 @@
+class, Point
+    fn, new(x, y)
+        set, self.x, x
+        set, self.y, y
+        return, self
+    /end
+    fn, magnitude_sq()
+        return, self.x * self.x + self.y * self.y
+    /end
+/end
+fn, main(): int
+    set, p, Point.new(3, 4)
+    assert, p.x == 3
+    assert, p.y == 4
+    assert, p.magnitude_sq() == 25
+    println, "class fields OK"
+    return, 0
+/end

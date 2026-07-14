@@ -1,0 +1,8 @@
+# Test math functions via interpreter
+import, "math", sqrt, pow, sin
+paste, "sqrt(16) = "
+paste, sqrt(16)
+paste, "\n"
+paste, "pow(2, 10) = "
+paste, pow(2, 10)
+paste, "\n"

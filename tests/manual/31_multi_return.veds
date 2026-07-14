@@ -1,0 +1,14 @@
+fn, divmod_q(a, b)
+    return, a // b
+/end
+fn, divmod_r(a, b)
+    return, a % b
+/end
+fn, main(): int
+    set, q, divmod_q(17, 5)
+    set, r, divmod_r(17, 5)
+    assert, q == 3
+    assert, r == 2
+    println, "multi return OK"
+    return, 0
+/end

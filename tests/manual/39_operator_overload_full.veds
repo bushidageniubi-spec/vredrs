@@ -1,0 +1,19 @@
+class, Vec
+    fn, new(x, y)
+        set, self.x, x
+        set, self.y, y
+        return, self
+    /end
+    fn, __add__(other)
+        return, Vec.new(self.x + other.x, self.y + other.y)
+    /end
+/end
+fn, main(): int
+    set, v1, Vec.new(1, 2)
+    set, v2, Vec.new(3, 4)
+    set, v3, v1 + v2
+    assert, v3.x == 4
+    assert, v3.y == 6
+    println, "operator overload full OK"
+    return, 0
+/end

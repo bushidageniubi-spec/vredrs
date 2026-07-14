@@ -1,0 +1,9 @@
+fn, main(): int
+    set, a, "Hello"
+    set, b, " "
+    set, c, "World"
+    set, msg, a + b + c
+    assert, msg == "Hello World"
+    println, "string concat vars OK"
+    return, 0
+/end

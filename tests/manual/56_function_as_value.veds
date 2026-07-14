@@ -1,0 +1,11 @@
+fn, double(x): int
+    return, x * 2
+/end
+fn, main(): int
+    set, r, double(5)
+    assert, r == 10
+    set, r2, double(21)
+    assert, r2 == 42
+    println, "function as value OK"
+    return, 0
+/end

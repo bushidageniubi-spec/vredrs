@@ -1,0 +1,44 @@
+# Acceptance test: generator methods (next, done, reset, to_list).
+
+fn, gen_squares(n)
+    for, i, in, 1...(n)
+        yield, i * i
+    /end
+/end
+
+set, g, gen_squares(5)
+assert, g.next() == 1
+assert, g.next() == 4
+assert, g.next() == 9
+assert, g.has_next() == true
+assert, g.next() == 16
+assert, g.next() == 25
+assert, g.has_next() == false
+assert, g.is_done() == true
+
+# Test reset
+g.reset()
+assert, g.is_done() == false
+assert, g.next() == 1
+
+# Test to_list
+g.reset()
+assert, g.to_list() == [1, 4, 9, 16, 25]
+
+# Test len
+assert, g.len() == 5
+
+# Simple yield without loop
+fn, gen_three()
+    yield, 10
+    yield, 20
+    yield, 30
+/end
+
+set, g2, gen_three()
+assert, g2.next() == 10
+assert, g2.next() == 20
+assert, g2.next() == 30
+assert, g2.next() == null
+
+println, "generators OK"

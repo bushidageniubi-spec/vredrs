@@ -1,0 +1,11 @@
+fn, main(): int
+    set, sum, 0
+    set, i, 0
+    while, i < 10
+        set, sum, sum + i
+        set, i, i + 2
+    /end
+    assert, sum == 20
+    println, "range step OK"
+    return, 0
+/end

@@ -1,0 +1,9 @@
+fn, main(): int
+    set, x, null
+    set, y, x ?? "default"
+    assert, y == "default"
+    set, z, "value" ?? "default"
+    assert, z == "value"
+    println, "null coalesce OK"
+    return, 0
+/end
